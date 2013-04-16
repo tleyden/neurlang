@@ -1,0 +1,12 @@
+/ebin
+/deps
+erl_crash.dump
+.#*
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+.elc
+auto-save-list
+tramp
+.\#*
