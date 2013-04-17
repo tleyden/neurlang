@@ -13,12 +13,12 @@ defmodule NeuronProcessTest do
 		neuron_process_state = NeuronProcessState.new(parameters: parameters, 
 																									input_nodes: [:fakepid, self()],
 																								  output_nodes: [self()])
-		{ :ok, pid } = NeuronProcess.start_link(neuron_process_state)
+		{ :ok, neuron_pid } = NeuronProcess.start_link(neuron_process_state)
 
-		NeuronProcess.send_input(pid, {:fakepid, 1})
+		NeuronProcess.send_input(neuron_pid, {:fakepid, 1})
 		assert(receive_output() == :timeout)  # neuron still waiting for other input
 
-		NeuronProcess.send_input(pid, {self(), 2})
+		NeuronProcess.send_input(neuron_pid, {self(), 2})
 		assert(receive_output() == 3)
 
 	end
