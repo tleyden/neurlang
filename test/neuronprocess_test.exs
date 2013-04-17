@@ -8,50 +8,26 @@ defmodule NeuronProcessTest do
 	alias Neurlang.NeuronProcessState, as: NeuronProcessState
 	alias Neurlang.TestHelper, as: TestHelper
 
-	test "redeisgn neuron" do
+	test "new v2 neuron" do
 
-		f = function(:summation, 3)
+		neuron1 = Neuron.new(id: make_ref(), bias: bias(10), activation_function: function(:summation, 3))
+		{ :ok, neuron1 } = NeuronProcess.start_link(neuron1)
 
-		# create network objects
-		sensor1 = Sensor.new(id: make_ref())
-		sensor2 = Sensor.new(id: make_ref())
-		neuron1_1 = Neuron.new(id: make_ref(), bias: bias(10), activation_function: f)
-		neuron1_2 = Neuron.new(id: make_ref(), bias: bias(-10), activation_function: f)
-		neuron2_1 = Neuron.new(id: make_ref(), bias: bias(-10), activation_function: f)
-		actuator = Actuator.new(id: make_ref())
+		mocksensor = MockNode.new(id: make_ref())
+		mockactuator = MockNode.new(id: make_ref())
+		{ :ok, mocksensor } = MockNodeProcess.start_link(mocksensor)
+		{ :ok, mockactuator } = MockNodeProcess.start_link(mockactuator)
+		
+		{mocksensor, _neuron1} = NeuralNetwork.connect(mocksensor, neuron1, weight(20))
+		{_neuron1, mockactuator} = NeuralNetwork.connect(neuron1, mockactuator)
 
-		# start network processes
-		{ :ok, sensor1 } = SensorProcess.start_link(sensor1)
-		{ :ok, sensor2 } = SensorProcess.start_link(sensor2)
-		{ :ok, neuron1_1 } = NeuronProcess.start_link(neuron1_1)
-		{ :ok, neuron1_2 } = NeuronProcess.start_link(neuron1_2)
-		{ :ok, neuron2_1 } = NeuronProcess.start_link(neuron2_1)
-
-		# this test process will act as the actuator process
-		actuator = actuator.pid(self())
-
-		# connect network
-		cortex = Cortex.new(id: make_ref())
-		{sensor1, neuron1_1} = Cortex.connect(cortex, sensor1, neuron1_1, weight(20))
-		{sensor1, neuron1_2} = Cortex.connect(cortex, sensor1, neuron1_2, weight(20))
-		{sensor2, neuron1_1} = Cortex.connect(cortex, sensor2, neuron1_1, weight(20))
-		{sensor2, neuron1_2} = Cortex.connect(cortex, sensor2, neuron1_2, weight(20))
-		{neuron1_1, neuron2_1} = Cortex.connect(cortex, neuron1_1, neuron2_1, weight(20))
-		{neuron1_2, neuron2_1} = Cortex.connect(cortex, neuron1_2, neuron2_1, weight(20))
-		{neuron2_1, actuator} = Cortex.connect(cortex, neuron2_1, actuator)
-
-		# put values into network, see if expected result comes back
-		SensorProcess.feed_forward(sensor1, 1)
-		assert(receive_actuator_output() == :timeout)  # neuron still waiting for other input
-
-		SensorProcess.feed_forward(sensor2, 2)
-		assert(receive_actuator_output() != :timeout)  
+		MockNodeProcess.send_input(mocksensor, 1)
+		received = MockNodeProcess.get_last_received(mockactuator)
+		assert(received == 30)
 
 	end
 
 	test "neuron process produces output when enough inputs provided" do
-
-		# OLD!!
 
 		weights = [2,2]
 		bias = 100
@@ -79,13 +55,6 @@ defmodule NeuronProcessTest do
 		TestHelper.summation(inputs, weights, bias)
 	end
 
-	def weight(x) do
-		x
-	end
-
-	def bias(x) do
-		x
-	end
 
 	def receive_actuator_output() do
 		:timeout
@@ -105,6 +74,12 @@ defmodule NeuronProcessTest do
 
 	end
 
+	def weight(x) do
+		x
+	end
 
+	def bias(x) do
+		x
+	end
 
 end
