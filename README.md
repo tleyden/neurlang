@@ -1,3 +1,3 @@
 # Neurlang
 
-** TODO: Add description **
+Neural Network toolkit in Elixir

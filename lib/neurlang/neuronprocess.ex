@@ -51,14 +51,11 @@ defmodule Neurlang.NeuronProcess do
 			inputs = get_inputs(state)
 			output_value = Neuron.process_input_vector(state.parameters(), inputs)  
 			outbound_message = {:output, output_value}			
-			Enum.each state.output_nodes(), 
+			Enum.each(state.output_nodes(), 
 												fn(node) -> 
-														IO.puts "sending #{inspect(outbound_message)} to #{inspect(node)}"
 														node <- outbound_message 
-												end
+												end)
 			state = state.barrier(HashDict.new)
-		else
-			IO.puts("barrier not satisfied")
 		end
 
 		{ :noreply, state }
@@ -78,7 +75,6 @@ defmodule Neurlang.NeuronProcess do
   Get the inputs that will be fed into neuron, which are stored in the now-full barrier.
   They must be in the same order as the keys of the input_nodes.
   """
-
 	defp get_inputs(NeuronProcessState[input_nodes: input_nodes, barrier: barrier]) do
 		lc input_node_pid inlist input_nodes, do: barrier[input_node_pid]
 	end
