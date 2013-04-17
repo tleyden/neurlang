@@ -9,8 +9,7 @@ defmodule NeuronProcessTest do
 
 	test "neuron process produces output when enough inputs provided" do
 
-		f = fn(inputs) -> Enum.reduce inputs, 0, fn(x, acc) -> x + acc end end
-    parameters = NeuronParameters.new(activation_function: f)
+    parameters = NeuronParameters.new(activation_function: function(:activation, 1))
 		neuron_process_state = NeuronProcessState.new(parameters: parameters, 
 																									input_nodes: [:fakepid, self()],
 																								  output_nodes: [self()])
@@ -19,17 +18,24 @@ defmodule NeuronProcessTest do
 		NeuronProcess.process_input(pid, {:fakepid, 1})
 		assert(receive_output() == :timeout)  # neuron still waiting for other input
 
-		NeuronProcess.process_input(pid, {self(), 1})
-		assert(receive_output() == :ok)
+		NeuronProcess.process_input(pid, {self(), 2})
+		assert(receive_output() == 3)
 
 	end
+
+
+	def activation(inputs) do
+		Enum.reduce inputs, 0, fn(x, acc) -> 
+															 x + acc 
+													 end 
+	end
+
 
 	def receive_output() do
 
 		received = receive do
 			{ :output, value} -> 
-				IO.puts "received value: #{value}"
-				:ok
+				value
 		after
 			1000 ->
 				IO.puts "timeout waiting for message"

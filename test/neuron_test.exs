@@ -9,13 +9,18 @@ defmodule NeuronTest do
 
   test "neuron produces output when process_input function called" do
 		
-		f = fn(inputs) -> Enum.reduce inputs, 0, fn(x, acc) -> x + acc end end
-    parameters = NeuronParameters.new(activation_function: f)
+    parameters = NeuronParameters.new(activation_function: function(:activation, 1))
 		inputs = [1,2]
 		output = Neuron.process_input_vector(parameters, inputs)
 		
 		assert(output == 3)
 
+	end
+
+	def activation(inputs) do
+		Enum.reduce inputs, 0, fn(x, acc) -> 
+															 x + acc 
+													 end 
 	end
 
 	
