@@ -4,6 +4,7 @@ defmodule NeuronTest do
   use ExUnit.Case
 	alias Neurlang.Neuron, as: Neuron
 	alias Neurlang.NeuronProcess, as: NeuronProcess
+	alias Neurlang.NeuronProcessState, as: NeuronProcessState
 
   test "neuron produces output when process_input function called" do
 		
@@ -17,14 +18,13 @@ defmodule NeuronTest do
 	end
 
 	test "neuron process produces output when enough inputs provided" do
-		
-		inbound_nodes = [self()]
-		outbound_nodes = [self()]
-		connected_nodes = [{:inbound_nodes, inbound_nodes}, {:outbound_nodes, outbound_nodes}]
 
 		f = fn(_x) -> 1 end
     parameters = NeuronParameters.new(activation_function: f)
-		{ :ok, pid } = NeuronProcess.start_link({parameters, connected_nodes})
+		neuron_process_state = NeuronProcessState.new(parameters: parameters, 
+																									input_nodes: [self()],
+																								  output_nodes: [self()])
+		{ :ok, pid } = NeuronProcess.start_link(neuron_process_state)
 		NeuronProcess.process_input(pid, {self(), 0.73})
 
 		received = receive do
