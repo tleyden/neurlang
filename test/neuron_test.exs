@@ -6,12 +6,13 @@ defmodule NeuronTest do
 	alias Neurlang.Neuron, as: Neuron
 	alias Neurlang.NeuronProcess, as: NeuronProcess
 	alias Neurlang.NeuronProcessState, as: NeuronProcessState
+	alias Neurlang.TestHelper, as: TestHelper
 
   test "neuron produces output when process_input function called" do
 		
 		weights = [2,2]
 		bias = 100
-    parameters = NeuronParameters.new(activation_function: function(:activation, 3),
+    parameters = NeuronParameters.new(activation_function: function(:summation, 3),
 																		  weights: weights,
 																		  bias: bias)
 		inputs = [1,2]
@@ -21,14 +22,8 @@ defmodule NeuronTest do
 
 	end
 
-	def activation(inputs, weights, bias) do
-		sum_inputs = Enum.reduce inputs, 0, fn(x, acc) -> 
-																						x + acc 
-																				end 
-		sum_weights = Enum.reduce weights, 0, fn(x, acc) -> 
-																							x + acc 
-																					end 
-		sum_inputs + sum_weights + bias
+	def summation(inputs, weights, bias) do
+		TestHelper.summation(inputs, weights, bias)
 	end
 
 	
