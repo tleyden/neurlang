@@ -35,7 +35,7 @@ defmodule Neurlang.NeuronProcess do
 	@doc """
   Wrap gen_server cast to provide more descriptive api
   """
-	def process_input(neuronprocess_pid, args) do
+	def send_input(neuronprocess_pid, args) do
 		:gen_server.cast(neuronprocess_pid, args)
 	end
 
