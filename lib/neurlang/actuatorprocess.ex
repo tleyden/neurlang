@@ -14,11 +14,13 @@ defmodule Neurlang.ActuatorProcess do
 
   """
 	def start_link(state) do
-		:gen_server.start_link(__MODULE__, state, [])	
+		{:ok, pid} = :gen_server.start_link(__MODULE__, state, [])	
+		state.pid(pid)
 	end
 
 	@doc false
 	def init(state) do
+		state = state.pid( self() ) 
 		{ :ok, state }
 	end
 
