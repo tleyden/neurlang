@@ -41,11 +41,25 @@ defmodule Neurlang.SensorProcess do
 		:gen_server.cast(sensor.pid(), :sync)
 	end
 
-	defp send_random_output(_state) do
-		# TODO
-		IO.puts "send_random_output"
-
+	defp send_random_output(state) do
+		IO.puts "send_random_output.  state: #{inspect(state)}"
+		output_vector = random_vector( state.output_vector_length() )
+		Enum.each state.outbound_connections(), fn(pid) -> 
+																								pid <- output_vector
+																						end
 	end
 
+	defp random_vector(length) do
+		IO.puts "length: |#{length}|"
+		random_vector(length, [])
+	end
+
+	defp random_vector(length, acc) do
+		random_vector(length-1, [ :random.uniform() | acc ])
+	end
+
+	defp random_vector(0, acc) do
+		acc
+	end
 
 end

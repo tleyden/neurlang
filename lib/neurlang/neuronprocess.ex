@@ -13,12 +13,14 @@ defmodule Neurlang.NeuronProcess do
   * `state` - a Neuron record
   """
 	def start_link(state) do
-		:gen_server.start_link(__MODULE__, state, [])	
+		{:ok, pid} = :gen_server.start_link(__MODULE__, state, [])	
+		state.pid(pid)
 	end
 
 	@doc false
-	def init(state) do
-		state = state.barrier(HashDict.new)
+	def init( state ) do
+		state = state.barrier( HashDict.new )
+		state = state.pid( self() ) 
 		{ :ok, state }
 	end
 
@@ -45,16 +47,16 @@ defmodule Neurlang.NeuronProcess do
     Handle a new incoming input value from another node in the neural net and
     send output to all connected output nodes
     """
+		IO.puts "neuron process received input: #{inspect(input_value)}"
 		state = update_barrier_state(state, {from_pid, input_value})
 
 		if is_barrier_satisfied(state) do
 			inputs = get_inputs(state)
 			output_value = NeuronMethod.compute_output(state, inputs)
 			outbound_message = {:output, output_value}			
-			Enum.each(state.output_nodes(), 
-												fn(node) -> 
-														node <- outbound_message 
-												end)
+			Enum.each state.output_nodes(), fn(node) -> 
+																					node <- outbound_message 
+																			end
 			state = state.barrier(HashDict.new)
 		end
 
