@@ -1,34 +1,34 @@
 
-defmodule Neurlang.Neuron do
 
-	@moduledoc """
-  A neuron
+defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: nil, inbound_connections: [], outbound_connections: [], barrier: nil do
+
+  @moduledoc """
+  Metadata for the Neuron node:
+
+  * `id` - a unique id gotten from calling make_ref()
+
+	* `pid` - the process id
+
+  * `activation_function` - a function which will be used to calculate the output, eg, a sigmoid funtion
+
+  * `bias` - after dot product of input vector and weight vector is taken, a scalar bias value is added
+
+	* `inbound_connections` - a list of {pid, weight_vector} tuples representing inbound connections
+
+	* `outbound_connections` - a list of pid's of output nodes this neuron process should send output to
+
+	* `barrier` - used to wait until receiving inputs from all connected input nodes before sending output
+
   """
-	
-	@doc """
-  Process the given input vector according to parameters and return output value
-  """
-	def process_input_vector(neuron_parameters, inputs) do
-		
-		activation_function = neuron_parameters.activation_function()
-		weights = neuron_parameters.weights()
-		bias = neuron_parameters.bias()
-
-		activation_function.(inputs, weights, bias)
-
-	end
-
-
-	@ doc """
-  Calculate the dot product
-  """
-	def dot([i|inputs], [w|weights], accumulator) do
-		dot(inputs, weights, i*w + accumulator)
-	end
-
-	def dot([], [], accumulator) do
-		accumulator
-	end
-
 
 end
+
+defrecord Neurlang.NeuronMethod do
+
+	def compute_output(_neuron, _inputs) do
+		# TODO!!
+		1
+	end
+  
+end
+

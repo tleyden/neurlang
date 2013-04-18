@@ -23,4 +23,9 @@ defmodule Neurlang.Mock.MockNodeProcess do
 		{ :noreply, state }
 	end
 
+	def send_input(mocknode, args) do
+		:gen_server.cast(mocknode.pid(), args)
+	end
+
+
 end

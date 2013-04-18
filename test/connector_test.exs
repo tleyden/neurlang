@@ -21,7 +21,7 @@ defmodule ConnectorTest do
 		mocksensor = mocksensor.pid(mocksensor_pid)
 		mockneuron = mockneuron.pid(mockneuron_pid)
 		
-		{mocksensor, mockneuron} = Connector.connect(mocksensor, mockneuron, weight([20]))  
+		{mocksensor, mockneuron} = Connector.connect_weighted(mocksensor, mockneuron, weight([20]))  
 		
 		assert(length(mockneuron.inbound_connections()) == 1, 
 						"neuron should have 1 item in inbound_connections, which is the mocksensor")  

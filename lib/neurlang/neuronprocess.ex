@@ -6,13 +6,14 @@ defmodule Neurlang.NeuronProcess do
   """
 	use GenServer.Behaviour
 	alias Neurlang.Neuron, as: Neuron
-	alias Neurlang.NeuronProcessState, as: NeuronProcessState
 
 	@doc """
   Start the process
+
+  * `state` - a Neuron record
   """
 	def start_link(state) do
-		:gen_server.start_link({:local, __MODULE__}, __MODULE__, state, [])	
+		:gen_server.start_link(__MODULE__, state, [])	
 	end
 
 	@doc false
@@ -22,8 +23,8 @@ defmodule Neurlang.NeuronProcess do
 	end
 
 	@doc false
-	def handle_info(msg, state) do
-		IO.puts "handle_info called with unexpected message: #{inspect(msg)}"
+	def handle_info({from_pid, input_value}, state) do
+		handle_input({from_pid, input_value}, state)
 		{ :noreply, state }
 	end
 
@@ -39,17 +40,16 @@ defmodule Neurlang.NeuronProcess do
 		:gen_server.cast(neuronprocess_pid, args)
 	end
 
-	@doc """
-  Handle a new incoming input value from another node in the neural net and
-  send output to all connected output nodes
-  """
 	defp handle_input({from_pid, input_value}, state) do
-
+		"""
+    Handle a new incoming input value from another node in the neural net and
+    send output to all connected output nodes
+    """
 		state = update_barrier_state(state, {from_pid, input_value})
 
 		if is_barrier_satisfied(state) do
 			inputs = get_inputs(state)
-			output_value = Neuron.process_input_vector(state.parameters(), inputs)  
+			output_value = NeuronMethod.compute_output(state, inputs)
 			outbound_message = {:output, output_value}			
 			Enum.each(state.output_nodes(), 
 												fn(node) -> 
@@ -61,31 +61,29 @@ defmodule Neurlang.NeuronProcess do
 		{ :noreply, state }
 	end
 
-	@doc """
-  Update the barrier in the state to reflect the fact that we've received
-  an input from this pid, and return the new state
-  """
 	defp update_barrier_state(state, {from_pid, input_value}) do
-		barrier = Dict.put(state.barrier(), from_pid, input_value)
-		state = state.barrier(barrier)
-		state
+		"""
+    Update the barrier in the state to reflect the fact that we've received
+    an input from this pid, and return the new state
+    """
+		state.barrier( Dict.put(state.barrier(), from_pid, input_value) )
 	end
 
-	@doc """
-  Get the inputs that will be fed into neuron, which are stored in the now-full barrier.
-  They must be in the same order as the keys of the input_nodes.
-  """
-	defp get_inputs(NeuronProcessState[input_nodes: input_nodes, barrier: barrier]) do
-		lc input_node_pid inlist input_nodes, do: barrier[input_node_pid]
+	defp get_inputs(Neuron[inbound_connections: inbound_connections, barrier: barrier]) do
+		"""
+    Get the inputs that will be fed into neuron, which are stored in the now-full barrier.
+		They must be in the same order as the keys of the input_nodes.
+		"""
+		lc {input_node_pid, _weights} inlist inbound_connections, do: barrier[input_node_pid]
 	end
 
-	@doc """
-  The barrier is satisfied when there is a pid key in the barrier for every single pid
-  in the state.input_nodes array
-  """
-	defp is_barrier_satisfied(NeuronProcessState[input_nodes: input_nodes, barrier: barrier]) do
-		input_nodes_accounted = Enum.filter(input_nodes, fn(pid) -> HashDict.has_key?(barrier, pid) end)
-		length(input_nodes_accounted) == length(input_nodes)																					
+	defp is_barrier_satisfied(Neuron[inbound_connections: inbound_connections, barrier: barrier]) do
+		"""
+		The barrier is satisfied when there is a pid key in the barrier for every single pid
+		in the state.input_nodes array
+    """
+		inbound_connections_accounted = Enum.filter(inbound_connections, fn({pid, _weights}) -> HashDict.has_key?(barrier, pid) end)
+		length(inbound_connections_accounted) == length(inbound_connections)																					
 	end
 
 end
