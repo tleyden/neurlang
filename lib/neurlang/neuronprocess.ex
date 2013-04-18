@@ -6,6 +6,7 @@ defmodule Neurlang.NeuronProcess do
   """
 	use GenServer.Behaviour
 	alias Neurlang.Neuron, as: Neuron
+	alias Neurlang.Sensor, as: Sensor
 
 	@doc """
   Start the process
@@ -25,7 +26,7 @@ defmodule Neurlang.NeuronProcess do
 	end
 
 	@doc false
-	def handle_info({from_pid, input_value}, state) do
+	def handle_info({from_pid, :forward, input_value}, state) do
 		handle_input({from_pid, input_value}, state)
 		{ :noreply, state }
 	end
@@ -35,11 +36,30 @@ defmodule Neurlang.NeuronProcess do
 		handle_input({from_pid, input_value}, state)
 	end
 
+	@doc false
+	def handle_call( {:add_inbound_connection, payload}, _from, state) do
+		IO.puts "handle_call called with: #{inspect(payload)}"
+		{ node, weights } = payload
+		inbound_connection = { node.pid(), weights }
+		state.inbound_connections( [ inbound_connection | state.inbound_connections() ] )
+		{ :reply, state, state }
+	end
+
 	@doc """
   Wrap gen_server cast to provide more descriptive api
   """
 	def send_input(neuronprocess_pid, args) do
 		:gen_server.cast(neuronprocess_pid, args)
+	end
+
+	@doc """
+	Add an inbound connection to this neuron from node (sensor | neuron)
+	"""
+	def add_inbound_connection( neuron, node, weights ) do
+		IO.puts "add_inbound: #{inspect(neuron)} - #{inspect(node)} - #{inspect(weights)}"
+		message = { :add_inbound_connection, { node, weights } }
+		:gen_server.call( neuron.pid(), message )
+		{ :reply, neuron }
 	end
 
 	defp handle_input({from_pid, input_value}, state) do
