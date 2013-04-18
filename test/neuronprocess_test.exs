@@ -18,8 +18,8 @@ defmodule NeuronProcessTest do
 		{ :ok, mocksensor } = MockNodeProcess.start_link(mocksensor)
 		{ :ok, mockactuator } = MockNodeProcess.start_link(mockactuator)
 		
-		{mocksensor, _neuron1} = NeuralNetwork.connect(mocksensor, neuron1, weight(20))
-		{_neuron1, mockactuator} = NeuralNetwork.connect(neuron1, mockactuator)
+		{mocksensor, _neuron1} = Connector.connect(mocksensor, neuron1, weight([20]))  
+		{_neuron1, mockactuator} = Connector.connect(neuron1, mockactuator)
 
 		MockNodeProcess.send_input(mocksensor, 1)
 		received = MockNodeProcess.get_last_received(mockactuator)
