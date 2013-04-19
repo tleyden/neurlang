@@ -16,7 +16,7 @@ defmodule NeuronProcessTest do
 
 	test "new v2 connected neuron" do
 
-		neuron = Neuron.new(id: make_ref(), bias: bias(10), activation_function: function(:summation, 3))
+		neuron = Neuron.new(id: make_ref(), bias: bias(10), activation_function: function(:identity, 1))
 		neuron = NeuronProcess.start_link(neuron)
 
 		sensor = Sensor.new(id: make_ref(), output_vector_length: 5)
@@ -26,23 +26,23 @@ defmodule NeuronProcessTest do
 		actuator = ActuatorProcess.start_link(actuator)
 	
 		sensor = SensorProcess.add_outbound_connection(sensor, neuron) 
-		neuron = NeuronProcess.add_inbound_connection(neuron, sensor, weight([20])) 
+		neuron = NeuronProcess.add_inbound_connection(neuron, sensor, weight([20, 20, 20, 20, 20])) 
 		
 		neuron = NeuronProcess.add_outbound_connection(neuron, actuator)
 		actuator = ActuatorProcess.add_inbound_connection(actuator, neuron)
 
-		SensorProcess.sync(sensor)
+		SensorProcess.sync_with_outputs(sensor, [1, 1, 1, 1, 1])
 		state = ActuatorProcess.get_current_state(actuator)
 		
 	  # TODO: method which waits until barrier is full, then gets the output
 		# received = todo(state)
 		# assert(received == 30)
-		:timer.sleep(5000)
+		:timer.sleep(5000)  # otherwise test exists while stuff still running
 
 	end
 
-	def summation(inputs, weights, bias) do
-		TestHelper.summation(inputs, weights, bias)
+	def identity(x) do
+		x
 	end
 
 

@@ -33,7 +33,14 @@ defmodule Neurlang.SensorProcess do
 
 	@doc false
 	def handle_cast(:sync, state) do
-		send_random_output(state)
+		random_outputs = random_vector( state.output_vector_length() )
+		send_output(state, random_outputs)
+		{ :noreply, state }
+	end
+
+	@doc false
+	def handle_cast( { :sync_with_outputs, outputs }, state) do
+		send_output(state, outputs)
 		{ :noreply, state }
 	end
 
@@ -44,11 +51,19 @@ defmodule Neurlang.SensorProcess do
 	end
 
 	@doc """
-  Cause this sensor to sense the environment and send outputs
+  Cause this sensor to sense the environment and send outputs.  
   """
 	def sync(sensor) do
 		:gen_server.cast(sensor.pid(), :sync)
 	end
+
+	@doc """
+  Cause this sensor to send the outputs specified here (useful for testing)
+  """
+	def sync_with_outputs(sensor, outputs) do
+		:gen_server.cast(sensor.pid(), { :sync_with_outputs, outputs })
+	end
+	
 
 	@doc """
 	Add an outbound connection from this sensor to given neuron
@@ -57,10 +72,10 @@ defmodule Neurlang.SensorProcess do
 		:gen_server.call(sensor.pid(), {:add_outbound_connection, neuron} )
 	end
 
-	defp send_random_output(state) do
+	defp send_output(state, outputs) do
 		IO.puts "send_random_output.  state: #{inspect(state)}"
-		output_vector = random_vector( state.output_vector_length() )
-		message = { self(), :forward, output_vector }
+
+		message = { self(), :forward, outputs }
 		Enum.each state.outbound_connections(), fn(pid) -> 
 																								pid <- message
 																						end

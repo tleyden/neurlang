@@ -22,28 +22,3 @@ defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: ni
   """
 
 end
-
-defmodule Neurlang.NeuronHelper do
-	@moduledoc """
-  Functionality of the nueron that is unrelated to process/communication/otp.
-  """
-	alias Neurlang.Neuron, as: Neuron
-
-	def compute_output(neuron) do
-		Neuron[activation_function: f, bias: bias] = neuron
-		inputs = get_inputs(neuron)
-		# TODO: get weights from inbound_connections ..
-		42
-	end
-
-	defp get_inputs(Neuron[inbound_connections: inbound_connections, barrier: barrier]) do
-		"""
-    Get the inputs that will be fed into neuron, which are stored in the now-full barrier.
-		They must be in the same order as the keys of the input_nodes.
-		"""
-		lc {input_node_pid, _weights} inlist inbound_connections, do: barrier[input_node_pid]
-	end
-
-  
-end
-
