@@ -54,9 +54,7 @@ defmodule Neurlang.SensorProcess do
 	Add an outbound connection from this sensor to given neuron
 	"""
 	def add_outbound_connection(sensor, neuron) do
-		IO.puts "add outbound connection called with: #{inspect(sensor)}"
-		sensor = :gen_server.call(sensor.pid(), {:add_outbound_connection, neuron} )
-		sensor
+		:gen_server.call(sensor.pid(), {:add_outbound_connection, neuron} )
 	end
 
 	defp send_random_output(state) do

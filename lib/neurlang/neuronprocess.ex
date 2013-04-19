@@ -27,6 +27,7 @@ defmodule Neurlang.NeuronProcess do
 
 	@doc false
 	def handle_info({from_pid, :forward, input_value}, state) do
+		IO.puts "neuron handle_info called"
 		handle_input({from_pid, input_value}, state)
 		{ :noreply, state }
 	end
@@ -38,28 +39,31 @@ defmodule Neurlang.NeuronProcess do
 
 	@doc false
 	def handle_call( {:add_inbound_connection, payload}, _from, state) do
-		IO.puts "handle_call called with: #{inspect(payload)}"
 		{ node, weights } = payload
 		inbound_connection = { node.pid(), weights }
-		state.inbound_connections( [ inbound_connection | state.inbound_connections() ] )
+		state = state.inbound_connections( [ inbound_connection | state.inbound_connections() ] )
 		{ :reply, state, state }
 	end
 
-	@doc """
-  Wrap gen_server cast to provide more descriptive api
-  """
-	def send_input(neuronprocess_pid, args) do
-		:gen_server.cast(neuronprocess_pid, args)
+	@doc false
+	def handle_call( {:add_outbound_connection, node}, _from, state) do
+		state = state.outbound_connections( [ node.pid() | state.outbound_connections() ] )
+		{ :reply, state, state }
 	end
 
 	@doc """
 	Add an inbound connection to this neuron from node (sensor | neuron)
 	"""
 	def add_inbound_connection( neuron, node, weights ) do
-		IO.puts "add_inbound: #{inspect(neuron)} - #{inspect(node)} - #{inspect(weights)}"
 		message = { :add_inbound_connection, { node, weights } }
 		:gen_server.call( neuron.pid(), message )
-		{ :reply, neuron }
+	end
+
+	@doc """
+	Add an outbound connection from this neuron to given node
+	"""
+	def add_outbound_connection( Neuron[pid: pid_param], node) do
+		:gen_server.call(pid_param, {:add_outbound_connection, node} )
 	end
 
 	defp handle_input({from_pid, input_value}, state) do
@@ -67,20 +71,27 @@ defmodule Neurlang.NeuronProcess do
     Handle a new incoming input value from another node in the neural net and
     send output to all connected output nodes
     """
-		IO.puts "neuron process received input: #{inspect(input_value)}"
+		IO.puts "neuron handle_input called"
+		IO.puts "neuron.handle_input called with: #{inspect(input_value)}"
 		state = update_barrier_state(state, {from_pid, input_value})
 
 		if is_barrier_satisfied(state) do
-			inputs = get_inputs(state)
-			output_value = NeuronMethod.compute_output(state, inputs)
-			outbound_message = {:output, output_value}			
-			Enum.each state.output_nodes(), fn(node) -> 
-																					node <- outbound_message 
-																			end
+			IO.puts "neuron barrier satisfied, sending outbound messages"
+			message = { self(), :forward, compute_output( state ) }
+			Enum.each state.outbound_connections(), fn(node) -> 
+																									node <- message 
+																							end
 			state = state.barrier(HashDict.new)
 		end
 
 		{ :noreply, state }
+	end
+
+	defp compute_output(state) do
+		Neuron[activation_function: f, bias: bias] = state
+		inputs = get_inputs(state)
+		# TODO: get weights from inbound_connections ..
+		42
 	end
 
 	defp update_barrier_state(state, {from_pid, input_value}) do

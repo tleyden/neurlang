@@ -25,7 +25,8 @@ defmodule Neurlang.ActuatorProcess do
 	end
 
 	@doc false
-	def handle_info({from_pid, input_value}, state) do
+	def handle_info({from_pid, :forward, input_value}, state) do
+		IO.puts "actuator handle_info called with: from_pid: #{inspect(from_pid)} input_value: #{inspect(input_value)}"
 		handle_input({from_pid, input_value}, state)
 		{ :noreply, state }
 	end
@@ -35,21 +36,31 @@ defmodule Neurlang.ActuatorProcess do
 		handle_input({from_pid, input_value}, state)
 	end
 
-	@doc """
-	Get the output from the actuator.
-
-  * `actuator` - the actuator record.
-
-  * `timeout_milliseconds` - will block for up to this amount waiting for barrier to fill
-
-  Returns a tuple {:ok, output_vector} or {:error, message} if the barrier
-  is not full within the timeout.
-  """
-	def get_output(_actuator, _timeout_milliseconds) do
-		# TODO - not sure how to do this yet.. needs to wait for 
-    # actuator to get all input
-		30
+	@doc false
+	def handle_call( :get_current_state, _from, state) do
+		{ :reply, state, state }
 	end
+
+	@doc false
+	def handle_call( {:add_inbound_connection, node}, _from, state) do
+		state = state.inbound_connections( [ node.pid() | state.inbound_connections() ] )
+		{ :reply, state, state }
+	end
+
+	@doc """
+	Get the current state (actuator record)
+  """
+	def get_current_state(Actuator[pid: pid_param]) do
+		:gen_server.call( pid_param, :get_current_state )
+	end
+
+	@doc """
+	Add an inbound connection to this actuator from node (sensor | neuron)
+	"""
+	def add_inbound_connection( Actuator[pid: pid_param], node ) do
+		:gen_server.call( pid_param, { :add_inbound_connection, node } )
+	end
+
 
 	defp handle_input({from_pid, input_value}, state) do
 		"""
@@ -57,6 +68,7 @@ defmodule Neurlang.ActuatorProcess do
     send output to all connected output nodes
     """
 		state = update_barrier_state(state, {from_pid, input_value})
+		IO.puts "post update_barrier_state: state: #{inspect(state)}"
 		{ :noreply, state }	
 	end
 
@@ -65,6 +77,7 @@ defmodule Neurlang.ActuatorProcess do
     Update the barrier in the state to reflect the fact that we've received
     an input from this pid, and return the new state
     """
+		IO.puts "update_barrier_state: state: #{inspect(state)} from_pid: #{inspect(from_pid)} input_value: #{inspect(input_value)}"
 		state.barrier( Dict.put(state.barrier(), from_pid, input_value) )
 	end
 
