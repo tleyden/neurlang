@@ -9,6 +9,10 @@ defmodule Neurlang.NeuronProcess do
 	alias Neurlang.Sensor, as: Sensor
 	alias Neurlang.NeuronHelper, as: NeuronHelper
 
+	import Neurlang.NodeHelper, only: [update_barrier_state: 2, is_barrier_satisfied: 1]
+
+	## API
+
 	@doc """
   Start the process
 
@@ -18,6 +22,46 @@ defmodule Neurlang.NeuronProcess do
 		{:ok, pid} = :gen_server.start_link(__MODULE__, state, [])	
 		state.pid(pid)
 	end
+
+	@doc """
+	Add an inbound connection to this neuron from node (sensor | neuron)
+	"""
+	def add_inbound_connection( neuron, node, weights ) do
+		message = { :add_inbound_connection, { node, weights } }
+		:gen_server.call( neuron.pid(), message )
+	end
+
+	@doc """
+	Add an outbound connection from this neuron to given node
+	"""
+	def add_outbound_connection( Neuron[pid: pid], node) do
+		:gen_server.call(pid, {:add_outbound_connection, node} )
+	end
+
+	## Private
+
+	defp handle_input({from_pid, input_value}, state) do
+		"""
+    Handle a new incoming input value from another node in the neural net and
+    send output to all connected output nodes
+    """
+		IO.puts "neuron.handle_input called with: #{inspect(input_value)}"
+		state = update_barrier_state(state, {from_pid, input_value})
+
+		if is_barrier_satisfied(state) do
+			IO.puts "neuron barrier satisfied, sending outbound messages"
+			message = { self(), :forward, NeuronHelper.compute_output( state ) }
+			Enum.each state.outbound_connections(), fn(node) -> 
+																									node <- message 
+																							end
+			state = state.barrier(HashDict.new)
+		end
+
+		{ :noreply, state }
+	end
+
+	
+	## OTP 
 
 	@doc false
 	def init( state ) do
@@ -52,56 +96,5 @@ defmodule Neurlang.NeuronProcess do
 		{ :reply, state, state }
 	end
 
-	@doc """
-	Add an inbound connection to this neuron from node (sensor | neuron)
-	"""
-	def add_inbound_connection( neuron, node, weights ) do
-		message = { :add_inbound_connection, { node, weights } }
-		:gen_server.call( neuron.pid(), message )
-	end
-
-	@doc """
-	Add an outbound connection from this neuron to given node
-	"""
-	def add_outbound_connection( Neuron[pid: pid], node) do
-		:gen_server.call(pid, {:add_outbound_connection, node} )
-	end
-
-	defp handle_input({from_pid, input_value}, state) do
-		"""
-    Handle a new incoming input value from another node in the neural net and
-    send output to all connected output nodes
-    """
-		IO.puts "neuron.handle_input called with: #{inspect(input_value)}"
-		state = update_barrier_state(state, {from_pid, input_value})
-
-		if is_barrier_satisfied(state) do
-			IO.puts "neuron barrier satisfied, sending outbound messages"
-			message = { self(), :forward, NeuronHelper.compute_output( state ) }
-			Enum.each state.outbound_connections(), fn(node) -> 
-																									node <- message 
-																							end
-			state = state.barrier(HashDict.new)
-		end
-
-		{ :noreply, state }
-	end
-
-	defp update_barrier_state(state, {from_pid, input_value}) do
-		"""
-    Update the barrier in the state to reflect the fact that we've received
-    an input from this pid, and return the new state
-    """
-		state.barrier( Dict.put(state.barrier(), from_pid, input_value) )
-	end
-
-	defp is_barrier_satisfied(Neuron[inbound_connections: inbound_connections, barrier: barrier]) do
-		"""
-		The barrier is satisfied when there is a pid key in the barrier for every single pid
-		in the state.input_nodes array
-    """
-		inbound_connections_accounted = Enum.filter(inbound_connections, fn({pid, _weights}) -> HashDict.has_key?(barrier, pid) end)
-		length(inbound_connections_accounted) == length(inbound_connections)																					
-	end
 
 end
