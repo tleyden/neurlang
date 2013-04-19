@@ -1,11 +1,5 @@
 Code.require_file "../test_helper.exs", __FILE__
 
-defrecord MockNode, pid: nil do
-	@defmodule """
-  Useful to allow neurons and actuators send messages to the test process
-  """
-end
-
 defmodule NeuralNetworkTest do
 
   use ExUnit.Case
@@ -32,10 +26,14 @@ defmodule NeuralNetworkTest do
 		
 		neuron = NeuronProcess.add_outbound_connection( neuron, actuator )
 		actuator = ActuatorProcess.add_inbound_connection( actuator, neuron )
+
+		# tap into actuator for testing purposes
 		actuator = ActuatorProcess.add_outbound_connection( actuator, MockNode.new( pid: self() ) )
 
+		# feed intput into sensor
 		SensorProcess.sync_with_outputs(sensor, [1, 1, 1, 1, 1])
 
+		# wait for output from actuator 
 		value = receive do
 			{pid, :forward, output} -> 
 				assert output == [ 110 ]  
@@ -59,4 +57,10 @@ defmodule NeuralNetworkTest do
 		x
 	end
 
+end
+
+defrecord MockNode, pid: nil do
+	@defmodule """
+  Useful to allow neurons and actuators send messages to the test process
+  """
 end
