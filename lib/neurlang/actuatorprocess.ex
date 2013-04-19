@@ -47,20 +47,33 @@ defmodule Neurlang.ActuatorProcess do
 		{ :reply, state, state }
 	end
 
+	@doc false
+	def handle_call( {:add_outbound_connection, node}, _from, state) do
+		IO.puts "handle_call, node: #{inspect(node)} node.pid: #{inspect(node.pid())}"
+		state = state.outbound_connections( [ node.pid() | state.outbound_connections() ] )
+		{ :reply, state, state }
+	end
+
 	@doc """
 	Get the current state (actuator record)
   """
-	def get_current_state(Actuator[pid: pid_param]) do
-		:gen_server.call( pid_param, :get_current_state )
+	def get_current_state(Actuator[pid: pid]) do
+		:gen_server.call( pid, :get_current_state )
 	end
 
 	@doc """
 	Add an inbound connection to this actuator from node (sensor | neuron)
 	"""
-	def add_inbound_connection( Actuator[pid: pid_param], node ) do
-		:gen_server.call( pid_param, { :add_inbound_connection, node } )
+	def add_inbound_connection( Actuator[pid: pid], node ) do
+		:gen_server.call( pid, { :add_inbound_connection, node } )
 	end
 
+	@doc """
+	Add an outbound connection from this neuron to given node
+	"""
+	def add_outbound_connection( Actuator[pid: pid], node) do
+		:gen_server.call(pid, {:add_outbound_connection, node} )
+	end
 
 	defp handle_input({from_pid, input_value}, state) do
 		"""

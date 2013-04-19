@@ -1,6 +1,7 @@
 
 
-defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: nil, inbound_connections: [], outbound_connections: [], barrier: nil do
+defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: nil, 
+										       inbound_connections: [], outbound_connections: [], barrier: HashDict.new do
 
   @moduledoc """
   Metadata for the Neuron node:

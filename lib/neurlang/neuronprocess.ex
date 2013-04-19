@@ -63,8 +63,8 @@ defmodule Neurlang.NeuronProcess do
 	@doc """
 	Add an outbound connection from this neuron to given node
 	"""
-	def add_outbound_connection( Neuron[pid: pid_param], node) do
-		:gen_server.call(pid_param, {:add_outbound_connection, node} )
+	def add_outbound_connection( Neuron[pid: pid], node) do
+		:gen_server.call(pid, {:add_outbound_connection, node} )
 	end
 
 	defp handle_input({from_pid, input_value}, state) do
