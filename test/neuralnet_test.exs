@@ -15,7 +15,6 @@ defmodule NeuralNetworkTest do
 	alias Neurlang.SensorProcess, as: SensorProcess
 	alias Neurlang.Actuator, as: Actuator
 	alias Neurlang.ActuatorProcess, as: ActuatorProcess
-	alias Neurlang.TestHelper, as: TestHelper
 
 	test "create a full neural net with one neuron and feed data through it" do
 

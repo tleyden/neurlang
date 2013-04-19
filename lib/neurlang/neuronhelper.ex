@@ -5,16 +5,26 @@ defmodule Neurlang.NeuronHelper do
   """
 	alias Neurlang.Neuron, as: Neuron
 
+	@doc """
+	Compute the output for this neuron based on its parameters (bias, activation function)
+	and the inputs/weights tuples stored in the barrier structure, which is presumed to
+  be full with inputs from all inbound nodes.
+	"""
 	def compute_output(neuron) do
 		Neuron[activation_function: activation_function, bias: bias] = neuron
 		weighted_inputs = get_weighted_inputs(neuron)
-		IO.puts "weighted_inputs: #{inspect(weighted_inputs)}"
-		dot_product = bias
-		Enum.each weighted_inputs, fn(weighted_input) ->
-																	 {inputs, weights} = weighted_input
-																	 dot_product = dot_product + dot_product(inputs, weights)  # <-- TODO!
-															 end
-		activation_function.(dot_product)
+		IO.puts "compute_output called with: #{inspect(neuron)} weighted_iinputs: #{inspect(weighted_inputs)}"
+		compute_output(weighted_inputs, bias, activation_function)
+	end
+
+	@doc false
+	def compute_output(weighted_inputs, bias, activation_function) do
+		reduce_function = fn({inputs, weights}, acc) -> 
+													dot_product(inputs, weights) + acc 
+											end
+		output = Enum.reduce weighted_inputs, 0, reduce_function 
+		output = output + bias
+		activation_function.(output)
 	end
 
 	defp get_weighted_inputs(Neuron[inbound_connections: inbound_connections, barrier: barrier]) do
