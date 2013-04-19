@@ -24,7 +24,9 @@ defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: ni
 end
 
 defmodule Neurlang.NeuronHelper do
-
+	@moduledoc """
+  Functionality of the nueron that is unrelated to process/communication/otp.
+  """
 	alias Neurlang.Neuron, as: Neuron
 
 	def compute_output(neuron) do
