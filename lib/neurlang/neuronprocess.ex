@@ -7,6 +7,7 @@ defmodule Neurlang.NeuronProcess do
 	use GenServer.Behaviour
 	alias Neurlang.Neuron, as: Neuron
 	alias Neurlang.Sensor, as: Sensor
+	alias Neurlang.NeuronHelper, as: NeuronHelper
 
 	@doc """
   Start the process
@@ -71,13 +72,12 @@ defmodule Neurlang.NeuronProcess do
     Handle a new incoming input value from another node in the neural net and
     send output to all connected output nodes
     """
-		IO.puts "neuron handle_input called"
 		IO.puts "neuron.handle_input called with: #{inspect(input_value)}"
 		state = update_barrier_state(state, {from_pid, input_value})
 
 		if is_barrier_satisfied(state) do
 			IO.puts "neuron barrier satisfied, sending outbound messages"
-			message = { self(), :forward, compute_output( state ) }
+			message = { self(), :forward, NeuronHelper.compute_output( state ) }
 			Enum.each state.outbound_connections(), fn(node) -> 
 																									node <- message 
 																							end
@@ -87,27 +87,12 @@ defmodule Neurlang.NeuronProcess do
 		{ :noreply, state }
 	end
 
-	defp compute_output(state) do
-		Neuron[activation_function: f, bias: bias] = state
-		inputs = get_inputs(state)
-		# TODO: get weights from inbound_connections ..
-		42
-	end
-
 	defp update_barrier_state(state, {from_pid, input_value}) do
 		"""
     Update the barrier in the state to reflect the fact that we've received
     an input from this pid, and return the new state
     """
 		state.barrier( Dict.put(state.barrier(), from_pid, input_value) )
-	end
-
-	defp get_inputs(Neuron[inbound_connections: inbound_connections, barrier: barrier]) do
-		"""
-    Get the inputs that will be fed into neuron, which are stored in the now-full barrier.
-		They must be in the same order as the keys of the input_nodes.
-		"""
-		lc {input_node_pid, _weights} inlist inbound_connections, do: barrier[input_node_pid]
 	end
 
 	defp is_barrier_satisfied(Neuron[inbound_connections: inbound_connections, barrier: barrier]) do
