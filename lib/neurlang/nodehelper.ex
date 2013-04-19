@@ -4,22 +4,15 @@ defmodule Neurlang.NodeHelper do
   """
 	alias Neurlang.Neuron, as: Neuron
 
-	def update_barrier_state(state, {from_pid, input_value}) do
+	def update_barrier_state(node, {from_pid, input_value}) do
 		"""
-    Update the barrier in the state to reflect the fact that we've received
-    an input from this pid, and return the new state
+    Update the barrier in the node to reflect the fact that we've received
+    an input from this pid, and return the new node
     """
-		state.barrier( Dict.put(state.barrier(), from_pid, input_value) )
+		IO.puts "upate_barrier_state: |#{inspect(input_value)}|"
+		node.barrier( Dict.put(node.barrier(), from_pid, input_value) )
 	end
 
-	def is_barrier_satisfied(Neuron[inbound_connections: inbound_connections, barrier: barrier]) do
-		"""
-		The barrier is satisfied when there is a pid key in the barrier for every single pid
-		in the state.input_nodes array
-    """
-		inbound_connections_accounted = Enum.filter(inbound_connections, fn({pid, _weights}) -> HashDict.has_key?(barrier, pid) end)
-		length(inbound_connections_accounted) == length(inbound_connections)																					
-	end
 
 
 

@@ -9,7 +9,7 @@ defmodule Neurlang.NeuronProcess do
 	alias Neurlang.Sensor, as: Sensor
 	alias Neurlang.NeuronHelper, as: NeuronHelper
 
-	import Neurlang.NodeHelper, only: [update_barrier_state: 2, is_barrier_satisfied: 1]
+	import Neurlang.NodeHelper, only: [update_barrier_state: 2]
 
 	## API
 
@@ -50,7 +50,8 @@ defmodule Neurlang.NeuronProcess do
 
 		if is_barrier_satisfied(state) do
 			IO.puts "neuron barrier satisfied, sending outbound messages"
-			message = { self(), :forward, NeuronHelper.compute_output( state ) }
+			output = NeuronHelper.compute_output( state ) 
+			message = { self(), :forward, output }
 			Enum.each state.outbound_connections(), fn(node) -> 
 																									node <- message 
 																							end
@@ -60,6 +61,14 @@ defmodule Neurlang.NeuronProcess do
 		{ :noreply, state }
 	end
 
+	def is_barrier_satisfied(Neuron[inbound_connections: inbound_connections, barrier: barrier]) do
+		"""
+		The barrier is satisfied when there is a pid key in the barrier for every single pid
+		in the state.input_nodes array
+    """
+		inbound_connections_accounted = Enum.filter(inbound_connections, fn({pid, _weights}) -> HashDict.has_key?(barrier, pid) end)
+		length(inbound_connections_accounted) == length(inbound_connections)																					
+	end
 	
 	## OTP 
 

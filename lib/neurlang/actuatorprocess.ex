@@ -7,6 +7,8 @@ defmodule Neurlang.ActuatorProcess do
 	use GenServer.Behaviour
 	alias Neurlang.Actuator, as: Actuator
 
+	import Neurlang.NodeHelper, only: [update_barrier_state: 2]
+
 	## API 
 
 	@doc """
@@ -49,17 +51,32 @@ defmodule Neurlang.ActuatorProcess do
     send output to all connected output nodes
     """
 		state = update_barrier_state(state, {from_pid, input_value})
-		IO.puts "post update_barrier_state: state: #{inspect(state)}"
+
+		if is_barrier_satisfied(state) do
+			IO.puts "actuator barrier satisfied, sending outbound messages"
+			message = { self(), :forward, get_received_inputs(state) }
+			IO.puts "state: #{inspect(state)} sending message: #{inspect(message)}"
+			Enum.each state.outbound_connections(), fn(node) -> 
+																									node <- message 
+																							end
+			state = state.barrier(HashDict.new)
+		end
 		{ :noreply, state }	
 	end
 
-	defp update_barrier_state(state, {from_pid, input_value}) do
-   	"""
-    Update the barrier in the state to reflect the fact that we've received
-    an input from this pid, and return the new state
+	def is_barrier_satisfied(Actuator[inbound_connections: inbound_connections, barrier: barrier]) do
+		"""
+		The barrier is satisfied when there is a pid key in the barrier for every single pid
+		in the state.input_nodes array
     """
-		IO.puts "update_barrier_state: state: #{inspect(state)} from_pid: #{inspect(from_pid)} input_value: #{inspect(input_value)}"
-		state.barrier( Dict.put(state.barrier(), from_pid, input_value) )
+		inbound_connections_accounted = Enum.filter(inbound_connections, fn(pid) -> HashDict.has_key?(barrier, pid) end)
+		length(inbound_connections_accounted) == length(inbound_connections)																					
+	end
+
+	defp get_received_inputs(state) do
+			barrier = state.barrier()
+			inbound_connections = state.inbound_connections()
+			inputs = lc input_node_pid inlist inbound_connections, do: barrier[input_node_pid]
 	end
 
 	## OTP

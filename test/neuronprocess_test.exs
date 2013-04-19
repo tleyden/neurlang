@@ -38,16 +38,13 @@ defmodule NeuronProcessTest do
 		SensorProcess.sync_with_outputs(sensor, [1, 1, 1, 1, 1])
 
 		value = receive do
-			output -> 
-				assert output == 110
+			{pid, :forward, output} -> 
+				assert output == [ 110 ]  
+			any ->
+				assert false, "Got unexpected message: #{inspect(any)}"
 		after
 			1000 -> assert false, "Did not receive any output from actuator in time"
 		end
-		
-	  # TODO: method which waits until barrier is full, then gets the output
-		# received = todo(state)
-		# assert(received == 30)
-		# :timer.sleep(5000)  # otherwise test exists while stuff still running
 
 	end
 
