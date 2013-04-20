@@ -5,6 +5,8 @@ defmodule Neurlang.NeuronHelper do
   """
 	alias Neurlang.Neuron, as: Neuron
 
+	## API
+
 	@doc """
 	Compute the output for this neuron based on its parameters (bias, activation function)
 	and the inputs/weights tuples stored in the barrier structure, which is presumed to
@@ -27,6 +29,16 @@ defmodule Neurlang.NeuronHelper do
 		activation_function.(output)
 	end
 
+	@doc """
+  Compute the dot product of the given vectors
+  """
+	@spec dot_product([number], [number]) :: number
+	def dot_product(inputs, weights) do
+		dot_product(inputs, weights, 0)
+	end
+
+	## Private
+
 	defp get_weighted_inputs(Neuron[inbound_connections: inbound_connections, barrier: barrier]) do
 		"""
     Get the inputs that will be fed into neuron, which are stored in the now-full barrier.
@@ -42,10 +54,7 @@ defmodule Neurlang.NeuronHelper do
 
 	end
 
-	def dot_product(inputs, weights) do
-		dot_product(inputs, weights, 0)
-	end
-
+	@spec dot_product([number], [number], number) :: number
 	defp dot_product([i|inputs], [w|weights], acc) do
 		dot_product(inputs, weights, i*w + acc)
 	end
