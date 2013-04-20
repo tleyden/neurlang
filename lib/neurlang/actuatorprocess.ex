@@ -76,7 +76,7 @@ defmodule Neurlang.ActuatorProcess do
 	defp get_received_inputs(state) do
 			barrier = state.barrier()
 			inbound_connections = state.inbound_connections()
-			inputs = lc input_node_pid inlist inbound_connections, do: barrier[input_node_pid]
+			lc input_node_pid inlist inbound_connections, do: barrier[input_node_pid]
 	end
 
 	## OTP
