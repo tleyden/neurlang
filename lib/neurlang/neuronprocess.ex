@@ -50,7 +50,7 @@ defmodule Neurlang.NeuronProcess do
 
 		if is_barrier_satisfied(state) do
 			IO.puts "neuron barrier satisfied, sending outbound messages"
-			output = NeuronHelper.compute_output( state ) 
+			output = [ NeuronHelper.compute_output( state ) ]
 			message = { self(), :forward, output }
 			Enum.each state.outbound_connections(), fn(node) -> 
 																									node <- message 

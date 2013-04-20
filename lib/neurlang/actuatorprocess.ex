@@ -53,8 +53,9 @@ defmodule Neurlang.ActuatorProcess do
 		state = update_barrier_state(state, {from_pid, input_value})
 
 		if is_barrier_satisfied(state) do
-			IO.puts "actuator barrier satisfied, sending outbound messages"
-			message = { self(), :forward, get_received_inputs(state) }
+			received_inputs = get_received_inputs(state)
+			outputs = List.flatten( received_inputs ) 
+			message = { self(), :forward, outputs }
 			IO.puts "state: #{inspect(state)} sending message: #{inspect(message)}"
 			Enum.each state.outbound_connections(), fn(node) -> 
 																									node <- message 
