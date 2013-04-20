@@ -10,3 +10,4 @@ erl_crash.dump
 auto-save-list
 tramp
 .\#*
+/.depsolver.plt
