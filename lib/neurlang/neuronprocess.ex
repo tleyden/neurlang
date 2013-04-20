@@ -48,7 +48,7 @@ defmodule Neurlang.NeuronProcess do
 		IO.puts "neuron.handle_input called with: #{inspect(input_value)}"
 		state = update_barrier_state(state, {from_pid, input_value})
 
-		if is_barrier_satisfied(state) do
+		if is_barrier_satisfied?(state) do
 			IO.puts "neuron barrier satisfied, sending outbound messages"
 			output = [ NeuronHelper.compute_output( state ) ]
 			message = { self(), :forward, output }
@@ -61,7 +61,7 @@ defmodule Neurlang.NeuronProcess do
 		state
 	end
 
-	def is_barrier_satisfied(Neuron[inbound_connections: inbound_connections, barrier: barrier]) do
+	def is_barrier_satisfied?(Neuron[inbound_connections: inbound_connections, barrier: barrier]) do
 		"""
 		The barrier is satisfied when there is a pid key in the barrier for every single pid
 		in the state.input_nodes array

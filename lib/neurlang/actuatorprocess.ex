@@ -52,7 +52,7 @@ defmodule Neurlang.ActuatorProcess do
     """
 		state = update_barrier_state(state, {from_pid, input_value})
 
-		if is_barrier_satisfied(state) do
+		if is_barrier_satisfied?(state) do
 			received_inputs = get_received_inputs(state)
 			outputs = List.flatten( received_inputs ) 
 			message = { self(), :forward, outputs }
@@ -65,7 +65,7 @@ defmodule Neurlang.ActuatorProcess do
 		state 	
 	end
 
-	def is_barrier_satisfied(Actuator[inbound_connections: inbound_connections, barrier: barrier]) do
+	def is_barrier_satisfied?(Actuator[inbound_connections: inbound_connections, barrier: barrier]) do
 		"""
 		The barrier is satisfied when there is a pid key in the barrier for every single pid
 		in the state.input_nodes array
