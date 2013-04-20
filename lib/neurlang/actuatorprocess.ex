@@ -62,7 +62,7 @@ defmodule Neurlang.ActuatorProcess do
 																							end
 			state = state.barrier(HashDict.new)
 		end
-		{ :noreply, state }	
+		state 	
 	end
 
 	def is_barrier_satisfied(Actuator[inbound_connections: inbound_connections, barrier: barrier]) do
@@ -91,13 +91,14 @@ defmodule Neurlang.ActuatorProcess do
 	@doc false
 	def handle_info({from_pid, :forward, input_value}, state) do
 		IO.puts "actuator handle_info called with: from_pid: #{inspect(from_pid)} input_value: #{inspect(input_value)}"
-		handle_input({from_pid, input_value}, state)
+		state = handle_input({from_pid, input_value}, state)
 		{ :noreply, state }
 	end
 
 	@doc false
 	def handle_cast({from_pid, input_value}, state) do
-		handle_input({from_pid, input_value}, state)
+		state = handle_input({from_pid, input_value}, state)
+		{ :noreply, state }
 	end
 
 	@doc false

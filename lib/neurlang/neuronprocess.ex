@@ -58,7 +58,7 @@ defmodule Neurlang.NeuronProcess do
 			state = state.barrier(HashDict.new)
 		end
 
-		{ :noreply, state }
+		state
 	end
 
 	def is_barrier_satisfied(Neuron[inbound_connections: inbound_connections, barrier: barrier]) do
@@ -82,13 +82,14 @@ defmodule Neurlang.NeuronProcess do
 	@doc false
 	def handle_info({from_pid, :forward, input_value}, state) do
 		IO.puts "neuron handle_info called"
-		handle_input({from_pid, input_value}, state)
+		state = handle_input({from_pid, input_value}, state)
 		{ :noreply, state }
 	end
 
 	@doc false
 	def handle_cast({from_pid, input_value}, state) do
-		handle_input({from_pid, input_value}, state)
+		state = handle_input({from_pid, input_value}, state)
+		{ :noreply, state }
 	end
 
 	@doc false
