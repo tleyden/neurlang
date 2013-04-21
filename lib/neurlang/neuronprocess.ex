@@ -9,6 +9,7 @@ defmodule Neurlang.NeuronProcess do
 	alias Neurlang.Sensor, as: Sensor
 	alias Neurlang.NeuronHelper, as: NeuronHelper
 	alias Neurlang.Barrier, as: Barrier
+	alias Neurlang.ConnectedNode, as: ConnectedNode
 
 	## API
 
@@ -83,16 +84,14 @@ defmodule Neurlang.NeuronProcess do
 	end
 
 	@doc false
-	def handle_call( {:add_inbound_connection, payload}, _from, state) do
-		{ node, weights } = payload
-		inbound_connection = { node.pid(), weights }
-		state = state.inbound_connections( [ inbound_connection | state.inbound_connections() ] )
+	def handle_call( {:add_inbound_connection, { node, weights }}, _from, state) do
+		state = ConnectedNode.add_inbound_connection( state, node, weights )
 		{ :reply, state, state }
 	end
 
 	@doc false
 	def handle_call( {:add_outbound_connection, node}, _from, state) do
-		state = state.outbound_connections( [ node.pid() | state.outbound_connections() ] )
+		state = ConnectedNode.add_outbound_connection( state, node )
 		{ :reply, state, state }
 	end
 

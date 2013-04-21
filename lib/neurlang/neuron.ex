@@ -1,6 +1,7 @@
 
 alias Neurlang.Barrier, as: Barrier
 alias Neurlang.Neuron, as: Neuron
+alias Neurlang.ConnectedNode, as: ConnectedNode
 
 defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: nil, 
 										       inbound_connections: [], outbound_connections: [], barrier: HashDict.new do
@@ -37,5 +38,22 @@ defimpl Barrier, for: Neuron do
 		length(inbound_connections_accounted) == length(inbound_connections)																					
 	end
 
+end
+
+defimpl ConnectedNode, for: Neuron do
+
+	def add_inbound_connection( node, from_node, weights ) do
+		inbound_connection = { from_node.pid(), weights }
+		node.inbound_connections( [ inbound_connection | node.inbound_connections() ] )
+	end
+
+	def add_inbound_connection( node, from_node ) do 
+		if node, do: throw "Neuron inbound connections must have weights associated with them"
+		node
+	end
+	
+	def add_outbound_connection( node, to_node ) do
+		node.outbound_connections( [ to_node.pid() | node.outbound_connections() ] )
+	end
 
 end
