@@ -6,8 +6,7 @@ defmodule Neurlang.ActuatorProcess do
   """
 	use GenServer.Behaviour
 	alias Neurlang.Actuator, as: Actuator
-
-	import Neurlang.NodeHelper, only: [update_barrier_state: 2]
+	alias Neurlang.Barrier, as: Barrier
 
 	## API 
 
@@ -50,9 +49,9 @@ defmodule Neurlang.ActuatorProcess do
     Handle a new incoming input value from another node in the neural net and
     send output to all connected output nodes
     """
-		state = update_barrier_state(state, {from_pid, input_value})
+		state = Barrier.update_barrier_state(state, {from_pid, input_value})
 
-		if is_barrier_satisfied?(state) do
+		if Barrier.is_barrier_satisfied?(state) do
 			received_inputs = get_received_inputs(state)
 			outputs = List.flatten( received_inputs ) 
 			message = { self(), :forward, outputs }
@@ -63,15 +62,6 @@ defmodule Neurlang.ActuatorProcess do
 			state = state.barrier(HashDict.new)
 		end
 		state 	
-	end
-
-	def is_barrier_satisfied?(Actuator[inbound_connections: inbound_connections, barrier: barrier]) do
-		"""
-		The barrier is satisfied when there is a pid key in the barrier for every single pid
-		in the state.input_nodes array
-    """
-		inbound_connections_accounted = Enum.filter(inbound_connections, fn(pid) -> HashDict.has_key?(barrier, pid) end)
-		length(inbound_connections_accounted) == length(inbound_connections)																					
 	end
 
 	defp get_received_inputs(state) do

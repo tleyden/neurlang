@@ -1,10 +1,12 @@
 
+alias Neurlang.Barrier, as: Barrier
+alias Neurlang.Actuator, as: Actuator
 
 defrecord Neurlang.Actuator, id: nil, pid: nil, inbound_connections: [], outbound_connections: [], 
 										         barrier: HashDict.new do
 
   @moduledoc """
-  Metadata for the Neuron node:
+  Metadata for the Actuator node:
 
   * `id` - a unique id gotten from calling make_ref()
 
@@ -21,4 +23,17 @@ defrecord Neurlang.Actuator, id: nil, pid: nil, inbound_connections: [], outboun
 
 end
 
+defimpl Barrier, for: Actuator do
 
+	def update_barrier_state(node, {from_pid, input_value}) do
+		node.barrier( Dict.put(node.barrier(), from_pid, input_value) )
+	end
+
+	def is_barrier_satisfied?(Actuator[inbound_connections: inbound_connections, barrier: barrier]) do
+		inbound_connections_accounted = Enum.filter(inbound_connections, fn(pid) -> HashDict.has_key?(barrier, pid) end)
+		length(inbound_connections_accounted) == length(inbound_connections)																					
+	end
+
+
+
+end

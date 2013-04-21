@@ -1,4 +1,6 @@
 
+alias Neurlang.Barrier, as: Barrier
+alias Neurlang.Neuron, as: Neuron
 
 defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: nil, 
 										       inbound_connections: [], outbound_connections: [], barrier: HashDict.new do
@@ -21,5 +23,19 @@ defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: ni
 	* `barrier` - used to wait until receiving inputs from all connected input nodes before sending output
 
   """
+
+end
+
+defimpl Barrier, for: Neuron do
+
+	def update_barrier_state(node, {from_pid, input_value}) do
+		node.barrier( Dict.put(node.barrier(), from_pid, input_value) )
+	end
+
+	def is_barrier_satisfied?(Neuron[inbound_connections: inbound_connections, barrier: barrier]) do
+		inbound_connections_accounted = Enum.filter(inbound_connections, fn({pid, _weights}) -> HashDict.has_key?(barrier, pid) end)
+		length(inbound_connections_accounted) == length(inbound_connections)																					
+	end
+
 
 end
