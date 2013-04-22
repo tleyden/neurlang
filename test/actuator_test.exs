@@ -6,7 +6,7 @@ defmodule ActuatorTest do
 	alias Neurlang.Sensor, as: Sensor
 	alias Neurlang.Actuator, as: Actuator
 	alias Neurlang.ConnectedNode, as: ConnectedNode
-	alias Neurlang.Barrier, as: Barrier
+	alias Neurlang.Accumulator, as: Accumulator
 
   test "barrier satisfied" do
 		
@@ -18,7 +18,7 @@ defmodule ActuatorTest do
 		barrier = HashDict.new()
 		barrier = Dict.put( barrier, :neuronpid, :fake_input)
 		actuator = actuator.barrier( barrier )
-		assert Barrier.is_barrier_satisfied?(actuator) == true
+		assert Accumulator.is_barrier_satisfied?(actuator) == true
 		IO.puts "done"
 	end
 
