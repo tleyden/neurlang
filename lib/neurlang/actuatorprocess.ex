@@ -6,7 +6,7 @@ defmodule Neurlang.ActuatorProcess do
   """
 	use GenServer.Behaviour
 	alias Neurlang.Actuator, as: Actuator
-	alias Neurlang.Barrier, as: Barrier
+	alias Neurlang.Accumulator, as: Accumulator
 	alias Neurlang.ConnectedNode, as: ConnectedNode
 
 	## API 
@@ -50,25 +50,17 @@ defmodule Neurlang.ActuatorProcess do
     Handle a new incoming input value from another node in the neural net and
     send output to all connected output nodes
     """
-		state = Barrier.update_barrier_state(state, {from_pid, input_value})
+		state = Accumulator.update_barrier_state(state, {from_pid, input_value})
 
-		if Barrier.is_barrier_satisfied?(state) do
-			received_inputs = get_received_inputs(state)
-			outputs = List.flatten( received_inputs ) 
-			message = { self(), :forward, outputs }
-			Enum.each state.outbound_connections(), fn(node) -> 
-																									node <- message 
-																							end
+		if Accumulator.is_barrier_satisfied?(state) do
+			output = Accumulator.compute_output( state )
+			Accumulator.propagate_output( state, output )
 			state = state.barrier(HashDict.new)
 		end
+
 		state 	
 	end
 
-	defp get_received_inputs(state) do
-			barrier = state.barrier()
-			inbound_connections = state.inbound_connections()
-			lc input_node_pid inlist inbound_connections, do: barrier[input_node_pid]
-	end
 
 	## OTP
 

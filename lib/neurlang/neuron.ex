@@ -1,6 +1,7 @@
 
-alias Neurlang.Barrier, as: Barrier
+alias Neurlang.Accumulator, as: Accumulator
 alias Neurlang.Neuron, as: Neuron
+alias Neurlang.NeuronHelper, as: NeuronHelper
 alias Neurlang.ConnectedNode, as: ConnectedNode
 
 defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: nil, 
@@ -27,16 +28,30 @@ defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: ni
 
 end
 
-defimpl Barrier, for: Neuron do
+defimpl Accumulator, for: Neuron do
 
-	def update_barrier_state(node, {from_pid, input_value}) do
+	def update_barrier_state( Neuron[] = node, {from_pid, input_value} ) do
 		node.barrier( Dict.put(node.barrier(), from_pid, input_value) )
 	end
 
-	def is_barrier_satisfied?(Neuron[inbound_connections: inbound_connections, barrier: barrier]) do
-		inbound_connections_accounted = Enum.filter(inbound_connections, fn({pid, _weights}) -> HashDict.has_key?(barrier, pid) end)
+	def is_barrier_satisfied?( Neuron[inbound_connections: inbound_connections, barrier: barrier] ) do
+		inbound_connections_accounted = Enum.filter(inbound_connections, fn({pid, _weights}) -> 
+																																				 HashDict.has_key?(barrier, pid) 
+																																		 end)
 		length(inbound_connections_accounted) == length(inbound_connections)																					
 	end
+
+	def compute_output( node ) do
+		[ NeuronHelper.compute_output( node ) ]
+	end
+
+	def propagate_output( node, output ) do
+		message = { node.pid(), :forward, output }
+		Enum.each node.outbound_connections(), fn(node) -> 
+																								node <- message 
+																						end
+	end
+
 
 end
 

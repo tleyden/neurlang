@@ -1,4 +1,4 @@
-defprotocol Neurlang.Barrier do
+defprotocol Neurlang.Accumulator do
 	alias Neurlang.Neuron, as: Neuron
 	alias Neurlang.Senor, as: Sensor
 	alias Neurlang.Actuator, as: Actuator
@@ -14,5 +14,16 @@ defprotocol Neurlang.Barrier do
 	in the inbound_connections array
   """
 	def is_barrier_satisfied?(node) 
+
+	@doc """
+  Compute the output after all inputs have been accumulated.
+  """
+	def compute_output(node)
+
+	@doc """
+  Propagate the output message to all outbound connnections
+  """
+	def propagate_output(node, output) 
+	
 
 end

@@ -1,5 +1,5 @@
 
-alias Neurlang.Barrier, as: Barrier
+alias Neurlang.Accumulator, as: Accumulator
 alias Neurlang.Actuator, as: Actuator
 alias Neurlang.ConnectedNode, as: ConnectedNode
 
@@ -24,7 +24,7 @@ defrecord Neurlang.Actuator, id: nil, pid: nil, inbound_connections: [], outboun
 
 end
 
-defimpl Barrier, for: Actuator do
+defimpl Accumulator, for: Actuator do
 
 	def update_barrier_state(node, {from_pid, input_value}) do
 		node.barrier( Dict.put(node.barrier(), from_pid, input_value) )
@@ -38,6 +38,23 @@ defimpl Barrier, for: Actuator do
 		IO.puts "actuator.is_barrier_satisfied called.  ic: #{inspect(inbound_connections)}"
 		length(inbound_connections_accounted) == length(inbound_connections)																					
 	end
+
+
+	def compute_output( node ) do
+			barrier = node.barrier()
+			inbound_connections = node.inbound_connections()
+			received_inputs = lc input_node_pid inlist inbound_connections, do: barrier[input_node_pid]
+			List.flatten( received_inputs ) 
+	end
+
+	def propagate_output( node, output ) do
+		# TODO, this duplicated code could be refactored into a defimpl for both Actuator, Neuron and Sensor
+		message = { node.pid(), :forward, output }
+		Enum.each node.outbound_connections(), fn(node) -> 
+																								node <- message 
+																						end
+	end
+
 
 end
 

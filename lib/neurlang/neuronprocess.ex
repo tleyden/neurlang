@@ -8,7 +8,7 @@ defmodule Neurlang.NeuronProcess do
 	alias Neurlang.Neuron, as: Neuron
 	alias Neurlang.Sensor, as: Sensor
 	alias Neurlang.NeuronHelper, as: NeuronHelper
-	alias Neurlang.Barrier, as: Barrier
+	alias Neurlang.Accumulator, as: Accumulator
 	alias Neurlang.ConnectedNode, as: ConnectedNode
 
 	## API
@@ -45,16 +45,11 @@ defmodule Neurlang.NeuronProcess do
     Handle a new incoming input value from another node in the neural net and
     send output to all connected output nodes
     """
-		IO.puts "neuron.handle_input called with: #{inspect(input_value)}"
-		state = Barrier.update_barrier_state(state, {from_pid, input_value})
+		state = Accumulator.update_barrier_state(state, {from_pid, input_value})
 
-		if Barrier.is_barrier_satisfied?(state) do
-			IO.puts "neuron barrier satisfied, sending outbound messages"
-			output = [ NeuronHelper.compute_output( state ) ]
-			message = { self(), :forward, output }
-			Enum.each state.outbound_connections(), fn(node) -> 
-																									node <- message 
-																							end
+		if Accumulator.is_barrier_satisfied?(state) do
+			output = Accumulator.compute_output( state )
+			Accumulator.propagate_output( state, output )
 			state = state.barrier(HashDict.new)
 		end
 
