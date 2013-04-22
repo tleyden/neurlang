@@ -13,7 +13,7 @@ defmodule NeuralNetworkTest do
 	test "create a full neural net with one neuron and feed data through it" do
 
 		# Create nodes
-		neuron = Neuron.new( id: make_ref(), bias: bias(10), activation_function: function(:identity, 1) )
+		neuron = Neuron.new( id: make_ref(), bias: bias(10), activation_function: function(identity/1) )
 		neuron = NeuronProcess.start_link( neuron)
 
 		sensor = Sensor.new( id: make_ref(), output_vector_length: 5 )
@@ -30,14 +30,14 @@ defmodule NeuralNetworkTest do
 		actuator = ActuatorProcess.add_inbound_connection( actuator, neuron )
 
 		# tap into actuator for testing purposes
-		actuator = ActuatorProcess.add_outbound_connection( actuator, MockNode.new( pid: self() ) )
+		_actuator = ActuatorProcess.add_outbound_connection( actuator, MockNode.new( pid: self() ) )
 
 		# feed intput into sensor
 		SensorProcess.sync_with_outputs(sensor, [1, 1, 1, 1, 1])
 
 		# wait for output from actuator 
-		value = receive do
-			{pid, :forward, output} -> 
+		receive do
+			{_pid, :forward, output} -> 
 				assert output == [ 110 ]  
 			any ->
 				assert false, "Got unexpected message: #{inspect(any)}"
