@@ -62,7 +62,7 @@ defimpl ConnectedNode, for: Neuron do
 		node.inbound_connections( [ inbound_connection | node.inbound_connections() ] )
 	end
 
-	def add_inbound_connection( node, from_node ) do 
+	def add_inbound_connection( node, _from_node ) do 
 		if node, do: throw "Neuron inbound connections must have weights associated with them"
 		node
 	end

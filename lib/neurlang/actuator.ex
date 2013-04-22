@@ -61,7 +61,7 @@ end
 
 defimpl ConnectedNode, for: Actuator do
 
-	def add_inbound_connection( node, from_node, weights ) do
+	def add_inbound_connection( node, _from_node, _weights ) do
 		if node, do: throw "Actuator inbound connections do not have weights associated with them"
 		node
 	end
