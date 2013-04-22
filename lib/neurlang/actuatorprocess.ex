@@ -7,6 +7,7 @@ defmodule Neurlang.ActuatorProcess do
 	use GenServer.Behaviour
 	alias Neurlang.Actuator, as: Actuator
 	alias Neurlang.Barrier, as: Barrier
+	alias Neurlang.ConnectedNode, as: ConnectedNode
 
 	## API 
 
@@ -55,7 +56,6 @@ defmodule Neurlang.ActuatorProcess do
 			received_inputs = get_received_inputs(state)
 			outputs = List.flatten( received_inputs ) 
 			message = { self(), :forward, outputs }
-			IO.puts "state: #{inspect(state)} sending message: #{inspect(message)}"
 			Enum.each state.outbound_connections(), fn(node) -> 
 																									node <- message 
 																							end
@@ -80,7 +80,6 @@ defmodule Neurlang.ActuatorProcess do
 
 	@doc false
 	def handle_info({from_pid, :forward, input_value}, state) do
-		IO.puts "actuator handle_info called with: from_pid: #{inspect(from_pid)} input_value: #{inspect(input_value)}"
 		state = handle_input({from_pid, input_value}, state)
 		{ :noreply, state }
 	end
@@ -98,14 +97,13 @@ defmodule Neurlang.ActuatorProcess do
 
 	@doc false
 	def handle_call( {:add_inbound_connection, node}, _from, state) do
-		state = state.inbound_connections( [ node.pid() | state.inbound_connections() ] )
+		state = ConnectedNode.add_inbound_connection( state, node )
 		{ :reply, state, state }
 	end
 
 	@doc false
 	def handle_call( {:add_outbound_connection, node}, _from, state) do
-		IO.puts "handle_call, node: #{inspect(node)} node.pid: #{inspect(node.pid())}"
-		state = state.outbound_connections( [ node.pid() | state.outbound_connections() ] )
+		state = ConnectedNode.add_outbound_connection( state, node )
 		{ :reply, state, state }
 	end
 

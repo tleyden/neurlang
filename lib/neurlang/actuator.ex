@@ -1,6 +1,7 @@
 
 alias Neurlang.Barrier, as: Barrier
 alias Neurlang.Actuator, as: Actuator
+alias Neurlang.ConnectedNode, as: ConnectedNode
 
 defrecord Neurlang.Actuator, id: nil, pid: nil, inbound_connections: [], outbound_connections: [], 
 										         barrier: HashDict.new do
@@ -30,10 +31,36 @@ defimpl Barrier, for: Actuator do
 	end
 
 	def is_barrier_satisfied?(Actuator[inbound_connections: inbound_connections, barrier: barrier]) do
-		inbound_connections_accounted = Enum.filter(inbound_connections, fn(pid) -> HashDict.has_key?(barrier, pid) end)
+		IO.puts "is_barrier_satisfied: #{inspect(inbound_connections)}"
+		inbound_connections_accounted = Enum.filter(inbound_connections, fn(pid) ->  # TODO: change to  fn({pid, _weights}
+																																				 HashDict.has_key?(barrier, pid) 
+																																		 end)
+		IO.puts "actuator.is_barrier_satisfied called.  ic: #{inspect(inbound_connections)}"
 		length(inbound_connections_accounted) == length(inbound_connections)																					
 	end
 
+end
 
+
+defimpl ConnectedNode, for: Actuator do
+
+	def add_inbound_connection( node, from_node, weights ) do
+		if node, do: throw "Actuator inbound connections do not have weights associated with them"
+		node
+	end
+
+	def add_inbound_connection( node, from_node ) do 
+		IO.puts "actuator.add_inbound node: #{inspect(node)} from_node: #{inspect(from_node)}"
+		# TODO: change to this:
+		# weights = []
+		# inbound_connection = { from_node.pid(), weights }  
+		inbound_connection = from_node.pid()  
+		IO.puts "inbound_connection: #{inspect(inbound_connection)}"
+		node.inbound_connections( [ inbound_connection | node.inbound_connections() ] )
+	end
+	
+	def add_outbound_connection( node, to_node ) do
+		node.outbound_connections( [ to_node.pid() | node.outbound_connections() ] )
+	end
 
 end
