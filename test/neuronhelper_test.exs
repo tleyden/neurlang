@@ -17,9 +17,4 @@ defmodule NeuronHelperTest do
 		assert result == 460
 	end
 
-	test "dot product" do
-		dot_product = NeuronHelper.dot_product([2, 2], [4, 4])
-		assert dot_product == 16
-	end
-
 end

@@ -4,6 +4,9 @@ defmodule Neurlang.NeuronHelper do
   Functionality of the nueron that is unrelated to process/communication/otp.
   """
 	alias Neurlang.Neuron, as: Neuron
+	alias Neurlang.MathUtil, as: MathUtil
+
+	import MathUtil, only: [dot_product: 2]
 
 	## API
 
@@ -28,14 +31,6 @@ defmodule Neurlang.NeuronHelper do
 		activation_function.(output)
 	end
 
-	@doc """
-  Compute the dot product of the given vectors
-  """
-	@spec dot_product([number], [number]) :: number
-	def dot_product(inputs, weights) do
-		dot_product(inputs, weights, 0)
-	end
-
 	## Private
 
 	defp get_weighted_inputs(Neuron[inbound_connections: inbound_connections, barrier: barrier]) do
@@ -53,14 +48,6 @@ defmodule Neurlang.NeuronHelper do
 
 	end
 
-	@spec dot_product([number], [number], number) :: number
-	defp dot_product([i|inputs], [w|weights], acc) do
-		dot_product(inputs, weights, i*w + acc)
-	end
-
-	defp dot_product([], [], acc) do
-		acc
-	end
   
 end
 
