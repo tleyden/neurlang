@@ -31,11 +31,9 @@ defimpl Accumulator, for: Actuator do
 	end
 
 	def is_barrier_satisfied?(Actuator[inbound_connections: inbound_connections, barrier: barrier]) do
-		IO.puts "is_barrier_satisfied: #{inspect(inbound_connections)}"
-		inbound_connections_accounted = Enum.filter(inbound_connections, fn(pid) ->  # TODO: change to  fn({pid, _weights}
+		inbound_connections_accounted = Enum.filter(inbound_connections, fn(pid) -> 
 																																				 HashDict.has_key?(barrier, pid) 
 																																		 end)
-		IO.puts "actuator.is_barrier_satisfied called.  ic: #{inspect(inbound_connections)}"
 		length(inbound_connections_accounted) == length(inbound_connections)																					
 	end
 
@@ -67,12 +65,7 @@ defimpl ConnectedNode, for: Actuator do
 	end
 
 	def add_inbound_connection( node, from_node ) do 
-		IO.puts "actuator.add_inbound node: #{inspect(node)} from_node: #{inspect(from_node)}"
-		# TODO: change to this:
-		# weights = []
-		# inbound_connection = { from_node.pid(), weights }  
 		inbound_connection = from_node.pid()  
-		IO.puts "inbound_connection: #{inspect(inbound_connection)}"
 		node.inbound_connections( [ inbound_connection | node.inbound_connections() ] )
 	end
 	
