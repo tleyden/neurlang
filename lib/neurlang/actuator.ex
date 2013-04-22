@@ -22,6 +22,12 @@ defrecord Neurlang.Actuator, id: nil, pid: nil, inbound_connections: [], outboun
 
   """
 
+	record_type id: reference
+	record_type pid: pid
+	record_type inbound_connections: [pid]
+	record_type outbound_connections: [pid]
+	record_type barrier: Dict
+
 end
 
 defimpl Accumulator, for: Actuator do

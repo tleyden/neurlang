@@ -25,6 +25,12 @@ defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: ni
 	* `barrier` - used to wait until receiving inputs from all connected input nodes before sending output
 
   """
+	record_type id: reference
+	record_type pid: pid
+	record_type bias: number
+	record_type inbound_connections: [{pid, list}]
+	record_type outbound_connections: [pid]
+	record_type barrier: Dict
 
 end
 

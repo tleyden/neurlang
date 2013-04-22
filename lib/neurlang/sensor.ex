@@ -14,6 +14,10 @@ defrecord Neurlang.Sensor, id: nil, pid: nil, output_vector_length: nil, outboun
 	* `outbound_connections` - a list of pid's of output nodes this sensor should send output to
 
   """
+	record_type id: reference
+	record_type pid: pid
+	record_type output_vector_length: integer
+	record_type outbound_connections: [pid]
 
 end
 
