@@ -9,17 +9,13 @@ defmodule ActuatorTest do
 	alias Neurlang.Accumulator, as: Accumulator
 
   test "barrier satisfied" do
-		
 		actuator = Actuator.new(pid: :actuatorpid)
 		neuron = Neuron.new(pid: :neuronpid)
-		IO.puts "adding inbound connection"
 		actuator = ConnectedNode.add_inbound_connection( actuator, neuron )
-		IO.puts "added inbound connection"
 		barrier = HashDict.new()
 		barrier = Dict.put( barrier, :neuronpid, :fake_input)
 		actuator = actuator.barrier( barrier )
 		assert Accumulator.is_barrier_satisfied?(actuator) == true
-		IO.puts "done"
 	end
 
 

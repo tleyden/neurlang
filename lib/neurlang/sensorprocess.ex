@@ -17,7 +17,6 @@ defmodule Neurlang.SensorProcess do
   """
 	def start_link(state) do
 		{:ok, pid} = :gen_server.start_link(__MODULE__, state, [])	
-		IO.puts "sensor pid: #{inspect(pid)}"
 		state.pid(pid)
 	end
 
@@ -45,8 +44,6 @@ defmodule Neurlang.SensorProcess do
 	## Private
 
 	defp send_output(state, outputs) do
-		IO.puts "send_random_output.  state: #{inspect(state)}"
-
 		message = { self(), :forward, outputs }
 		Enum.each state.outbound_connections(), fn(pid) -> 
 																								pid <- message
@@ -54,7 +51,6 @@ defmodule Neurlang.SensorProcess do
 	end
 
 	defp random_vector(length) do
-		IO.puts "length: |#{length}|"
 		random_vector(length, [])
 	end
 

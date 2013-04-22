@@ -15,7 +15,6 @@ defmodule Neurlang.NeuronHelper do
 	def compute_output(neuron) do
 		Neuron[activation_function: activation_function, bias: bias] = neuron
 		weighted_inputs = get_weighted_inputs(neuron)
-		IO.puts "compute_output called with: #{inspect(neuron)} weighted_iinputs: #{inspect(weighted_inputs)}"
 		compute_output(weighted_inputs, bias, activation_function)
 	end
 

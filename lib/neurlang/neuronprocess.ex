@@ -67,7 +67,6 @@ defmodule Neurlang.NeuronProcess do
 
 	@doc false
 	def handle_info({from_pid, :forward, input_value}, state) do
-		IO.puts "neuron handle_info called"
 		state = handle_input({from_pid, input_value}, state)
 		{ :noreply, state }
 	end
