@@ -1,7 +1,6 @@
 
 alias Neurlang.Accumulator, as: Accumulator
 alias Neurlang.Neuron, as: Neuron
-alias Neurlang.NeuronHelper, as: NeuronHelper
 alias Neurlang.ConnectedNode, as: ConnectedNode
 
 defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: nil, 
@@ -98,6 +97,10 @@ defimpl Accumulator, for: Neuron do
 end
 
 defimpl ConnectedNode, for: Neuron do
+
+	def pid( node ) do
+		node.pid()
+	end
 
 	def add_inbound_connection( node, from_node, weights ) do
 		inbound_connection = { from_node.pid(), weights }

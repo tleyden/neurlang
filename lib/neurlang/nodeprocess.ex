@@ -1,13 +1,10 @@
 
-defmodule Neurlang.NeuronProcess do
+defmodule Neurlang.NodeProcess do
 
 	@moduledoc """
   This wraps a neuron and provides functionality to communicate with other nodes (sensors, neurons, actuators).  
   """
 	use GenServer.Behaviour
-	alias Neurlang.Neuron, as: Neuron
-	alias Neurlang.Sensor, as: Sensor
-	alias Neurlang.NeuronHelper, as: NeuronHelper
 	alias Neurlang.Accumulator, as: Accumulator
 	alias Neurlang.ConnectedNode, as: ConnectedNode
 
@@ -16,7 +13,7 @@ defmodule Neurlang.NeuronProcess do
 	@doc """
   Start the process
 
-  * `state` - a Neuron record
+  * `state` - a Neuron, Actuator, or Sensor record
   """
 	def start_link(state) do
 		{:ok, pid} = :gen_server.start_link(__MODULE__, state, [])	
@@ -26,16 +23,23 @@ defmodule Neurlang.NeuronProcess do
 	@doc """
 	Add an inbound connection to this neuron from node (sensor | neuron)
 	"""
-	def add_inbound_connection( neuron, node, weights ) do
-		message = { :add_inbound_connection, { node, weights } }
-		:gen_server.call( neuron.pid(), message )
+	def add_inbound_connection( node, from_node, weights ) do
+		message = { :add_inbound_connection, { from_node, weights } }
+		:gen_server.call( ConnectedNode.pid( node ), message )
+	end
+
+	@doc """
+	Add an inbound connection to this actuator from node (sensor | neuron)
+	"""
+	def add_inbound_connection( node, from_node ) do
+		:gen_server.call( ConnectedNode.pid( node ), { :add_inbound_connection, from_node } )
 	end
 
 	@doc """
 	Add an outbound connection from this neuron to given node
 	"""
-	def add_outbound_connection( Neuron[pid: pid], node) do
-		:gen_server.call(pid, {:add_outbound_connection, node} )
+	def add_outbound_connection( node, to_node) do
+		:gen_server.call( ConnectedNode.pid( node ), {:add_outbound_connection, to_node} )
 	end
 
 	## Private
@@ -80,6 +84,12 @@ defmodule Neurlang.NeuronProcess do
 	@doc false
 	def handle_call( {:add_inbound_connection, { node, weights }}, _from, state) do
 		state = ConnectedNode.add_inbound_connection( state, node, weights )
+		{ :reply, state, state }
+	end
+
+	@doc false
+	def handle_call( {:add_inbound_connection, node}, _from, state) do
+		state = ConnectedNode.add_inbound_connection( state, node )
 		{ :reply, state, state }
 	end
 

@@ -4,11 +4,11 @@ defmodule NeuralNetworkTest do
 
   use ExUnit.Case
 	alias Neurlang.Neuron, as: Neuron
-	alias Neurlang.NeuronProcess, as: NeuronProcess
+	alias Neurlang.NodeProcess, as: NeuronProcess
 	alias Neurlang.Sensor, as: Sensor
 	alias Neurlang.SensorProcess, as: SensorProcess
 	alias Neurlang.Actuator, as: Actuator
-	alias Neurlang.ActuatorProcess, as: ActuatorProcess
+	alias Neurlang.NodeProcess, as: ActuatorProcess
 
 	test "create a full neural net with one neuron and feed data through it" do
 

@@ -6,6 +6,9 @@ defprotocol Neurlang.ConnectedNode do
 	@doc """
   Add an inbound connection from from_node into this node, with the given weights
   """
+
+	def pid( node )
+
 	def add_inbound_connection( node, from_node, weights )
 
 	def add_inbound_connection( node, from_node )
