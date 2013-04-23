@@ -35,6 +35,8 @@ defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: ni
 end
 
 defimpl Accumulator, for: Neuron do
+	alias Neurlang.MathUtil, as: MathUtil
+	import MathUtil, only: [dot_product: 2]
 
 	def update_barrier_state( Neuron[] = node, {from_pid, input_value} ) do
 		node.barrier( Dict.put(node.barrier(), from_pid, input_value) )
@@ -47,8 +49,16 @@ defimpl Accumulator, for: Neuron do
 		length(inbound_connections_accounted) == length(inbound_connections)																					
 	end
 
-	def compute_output( node ) do
-		[ NeuronHelper.compute_output( node ) ]
+	@doc """
+	Compute the output for this neuron based on its parameters (bias, activation function)
+	and the inputs/weights tuples stored in the barrier structure, which is presumed to
+  be full with inputs from all inbound nodes.
+	"""
+	def compute_output(neuron) do
+		Neuron[activation_function: activation_function, bias: bias] = neuron
+		weighted_inputs = get_weighted_inputs(neuron)
+		scalar_output = compute_output(weighted_inputs, bias, activation_function)
+		[ scalar_output ]
 	end
 
 	def propagate_output( node, output ) do
@@ -56,6 +66,32 @@ defimpl Accumulator, for: Neuron do
 		Enum.each node.outbound_connections(), fn(node) -> 
 																								node <- message 
 																						end
+	end
+
+	@doc false
+	defp compute_output(weighted_inputs, bias, activation_function) do
+		reduce_function = fn({inputs, weights}, acc) -> 
+													dot_product(inputs, weights) + acc 
+											end
+		output = Enum.reduce weighted_inputs, 0, reduce_function 
+		output = output + bias
+		activation_function.(output)
+	end
+
+	@doc false
+	defp get_weighted_inputs(Neuron[inbound_connections: inbound_connections, barrier: barrier]) do
+		"""
+    Get the inputs that will be fed into neuron, which are stored in the now-full barrier.
+    Returns a list of the form [{input_vector,weight_vector}, ...]
+		"""
+		lc {input_node_pid, weights} inlist inbound_connections do
+			inputs = barrier[input_node_pid]
+			if length(inputs) != length(weights) do 
+				throw "length of inputs #{inspect(inputs)} != length of weights #{inspect(weights)}"
+			end
+			{ inputs, weights } 
+		end
+
 	end
 
 
