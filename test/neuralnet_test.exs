@@ -13,7 +13,7 @@ defmodule NeuralNetworkTest do
 	test "create a full neural net with one neuron and feed data through it" do
 
 		# Create nodes
-		neuron = Neuron.new( id: make_ref(), bias: bias(10), activation_function: function(identity/1) )
+		neuron = Neuron.new( id: make_ref(), bias: 10, activation_function: function(identity/1) )
 		neuron = NeuronProcess.start_link( neuron)
 
 		sensor = Sensor.new( id: make_ref(), output_vector_length: 5, sync_function: function(sync_function/1) )
@@ -55,10 +55,6 @@ defmodule NeuralNetworkTest do
 	end 
 
 	def weight(x) do
-		x
-	end
-
-	def bias(x) do
 		x
 	end
 
