@@ -56,7 +56,6 @@ defimpl Accumulator, for: Actuator do
 	end
 
 	def propagate_output( node, output ) do
-		# TODO, this duplicated code could be refactored into a defimpl for both Actuator, Neuron and Sensor
 		message = { node.pid(), :forward, output }
 		Enum.each node.outbound_connections(), fn(node) -> 
 																								node <- message 
