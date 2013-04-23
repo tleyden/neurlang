@@ -1,6 +1,7 @@
 
-alias Neurlang.Accumulator, as: Accumulator
+
 alias Neurlang.Neuron, as: Neuron
+alias Neurlang.Accumulator, as: Accumulator
 alias Neurlang.ConnectedNode, as: ConnectedNode
 
 defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: nil, 
@@ -37,6 +38,10 @@ defimpl Accumulator, for: Neuron do
 	alias Neurlang.MathUtil, as: MathUtil
 	import MathUtil, only: [dot_product: 2]
 
+	def create_barrier( node ) do
+		node.barrier( HashDict.new )
+	end
+
 	def update_barrier_state( Neuron[] = node, {from_pid, input_value} ) do
 		node.barrier( Dict.put(node.barrier(), from_pid, input_value) )
 	end
@@ -65,6 +70,11 @@ defimpl Accumulator, for: Neuron do
 		Enum.each node.outbound_connections(), fn(node) -> 
 																								node <- message 
 																						end
+	end
+
+	def sync( node ) do
+		if node, do: throw "Neurons do not have sync functionality yet"
+		node
 	end
 
 	@doc false

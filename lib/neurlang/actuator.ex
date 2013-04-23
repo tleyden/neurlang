@@ -32,6 +32,10 @@ end
 
 defimpl Accumulator, for: Actuator do
 
+	def create_barrier( node ) do
+		node.barrier( HashDict.new )
+	end
+
 	def update_barrier_state(node, {from_pid, input_value}) do
 		node.barrier( Dict.put(node.barrier(), from_pid, input_value) )
 	end
@@ -57,6 +61,11 @@ defimpl Accumulator, for: Actuator do
 		Enum.each node.outbound_connections(), fn(node) -> 
 																								node <- message 
 																						end
+	end
+
+	def sync( node ) do
+		if node, do: throw "Actuators do not have sync functionality yet"
+		node
 	end
 
 

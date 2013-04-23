@@ -42,9 +42,17 @@ defmodule Neurlang.NodeProcess do
 		:gen_server.call( ConnectedNode.pid( node ), {:add_outbound_connection, to_node} )
 	end
 
+	@doc """
+  Cause this sensor to sense the environment and send outputs.  
+  """
+	def sync( node ) do
+		:gen_server.cast( ConnectedNode.pid( node ), :sync )
+	end
+
+
 	## Private
 
-	defp handle_input({from_pid, input_value}, state) do
+	defp handle_input( {from_pid, input_value}, state ) do
 		"""
     Handle a new incoming input value from another node in the neural net and
     send output to all connected output nodes
@@ -54,7 +62,7 @@ defmodule Neurlang.NodeProcess do
 		if Accumulator.is_barrier_satisfied?(state) do
 			output = Accumulator.compute_output( state )
 			Accumulator.propagate_output( state, output )
-			state = state.barrier(HashDict.new)
+			state = Accumulator.create_barrier( state )
 		end
 
 		state
@@ -64,7 +72,7 @@ defmodule Neurlang.NodeProcess do
 
 	@doc false
 	def init( state ) do
-		state = state.barrier( HashDict.new )
+		state = Accumulator.create_barrier( state )
 		state = state.pid( self() ) 
 		{ :ok, state }
 	end
@@ -78,6 +86,13 @@ defmodule Neurlang.NodeProcess do
 	@doc false
 	def handle_cast({from_pid, input_value}, state) do
 		state = handle_input({from_pid, input_value}, state)
+		{ :noreply, state }
+	end
+
+	@doc false
+	def handle_cast(:sync, state) do
+		output = Accumulator.sync( state )
+		Accumulator.propagate_output( state, output )
 		{ :noreply, state }
 	end
 
@@ -98,6 +113,7 @@ defmodule Neurlang.NodeProcess do
 		state = ConnectedNode.add_outbound_connection( state, node )
 		{ :reply, state, state }
 	end
+
 
 
 end

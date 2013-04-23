@@ -6,7 +6,7 @@ defmodule NeuralNetworkTest do
 	alias Neurlang.Neuron, as: Neuron
 	alias Neurlang.NodeProcess, as: NeuronProcess
 	alias Neurlang.Sensor, as: Sensor
-	alias Neurlang.SensorProcess, as: SensorProcess
+	alias Neurlang.NodeProcess, as: SensorProcess
 	alias Neurlang.Actuator, as: Actuator
 	alias Neurlang.NodeProcess, as: ActuatorProcess
 
@@ -16,7 +16,7 @@ defmodule NeuralNetworkTest do
 		neuron = Neuron.new( id: make_ref(), bias: bias(10), activation_function: function(identity/1) )
 		neuron = NeuronProcess.start_link( neuron)
 
-		sensor = Sensor.new( id: make_ref(), output_vector_length: 5 )
+		sensor = Sensor.new( id: make_ref(), output_vector_length: 5, sync_function: function(sync_function/1) )
 		sensor = SensorProcess.start_link( sensor ) 
 
 		actuator = Actuator.new( id: make_ref() )
@@ -25,7 +25,6 @@ defmodule NeuralNetworkTest do
 		# Wire up network
 		sensor = SensorProcess.add_outbound_connection( sensor, neuron ) 
 		neuron = NeuronProcess.add_inbound_connection( neuron, sensor, weight([20, 20, 20, 20, 20]) ) 
-		
 		neuron = NeuronProcess.add_outbound_connection( neuron, actuator )
 		actuator = ActuatorProcess.add_inbound_connection( actuator, neuron )
 
@@ -33,7 +32,7 @@ defmodule NeuralNetworkTest do
 		_actuator = ActuatorProcess.add_outbound_connection( actuator, MockNode.new( pid: self() ) )
 
 		# feed intput into sensor
-		SensorProcess.sync_with_outputs(sensor, [1, 1, 1, 1, 1])
+		SensorProcess.sync(sensor)
 
 		# wait for output from actuator 
 		receive do
@@ -50,6 +49,10 @@ defmodule NeuralNetworkTest do
 	def identity(x) do
 		x
 	end
+
+	def sync_function(_sensor) do
+		[1, 1, 1, 1, 1]
+	end 
 
 	def weight(x) do
 		x
