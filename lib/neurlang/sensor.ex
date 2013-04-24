@@ -59,7 +59,7 @@ defimpl Accumulator, for: Sensor do
 
 	def sync( node ) do
 		f = node.sync_function()
-		f.( node )
+		f.( )
 	end
 
 end
