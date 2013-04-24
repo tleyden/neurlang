@@ -53,11 +53,11 @@ defmodule NeuralNetworkTest do
 		#sensor = Sensor.new( id: make_ref(), output_vector_length: 1, sync_function: function(xnor_sync_function/1) )
 		#sensor = SensorProcess.start_link( sensor ) 
 
-		f = MathUtil.create_generator([0, 1, 1, 0])
-		assert f.(nil) == 0
-		assert f.(nil) == 1
-		assert f.(nil) == 1
-		assert f.(nil) == 0
+		next = MathUtil.create_generator([0, 1, 1, 0])
+		assert next.() == 0
+		assert next.() == 1
+		assert next.() == 1
+		assert next.() == 0
 
 	end
 

@@ -22,7 +22,7 @@ defmodule Neurlang.MathUtil do
 	@spec create_generator(list) :: fun 
 	def create_generator(values) do
 		receiver_pid = Process.spawn __MODULE__, :generator, [values]
-		f = fn(_ignored) ->
+		f = fn() ->
 						receiver_pid <- self()
 						receive do
 							returnval ->
