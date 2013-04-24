@@ -3,7 +3,7 @@ alias Neurlang.Accumulator, as: Accumulator
 alias Neurlang.ConnectedNode, as: ConnectedNode
 alias Neurlang.Sensor, as: Sensor
 
-defrecord Neurlang.Sensor, id: nil, pid: nil, sync_function: nil, output_vector_length: nil, outbound_connections: []  do
+defrecord Neurlang.Sensor, id: nil, pid: nil, sync_function: nil, outbound_connections: []  do
 
   @moduledoc """
   Metadata for the Neuron node:
@@ -15,16 +15,12 @@ defrecord Neurlang.Sensor, id: nil, pid: nil, sync_function: nil, output_vector_
 	* `sync_function` - this function is called when the sensor receives a sync message.  
                       the return value is expected to be an input vector, and is forwarded
                       to all outbound connections.
-
-  * `output_vector_length` - the sensors outputs vectors of this length
-
 	* `outbound_connections` - a list of pid's of output nodes this sensor should send output to
 
   """
 	record_type id: reference
 	record_type pid: pid
 	record_type sync_function: (fun(any) -> [number])
-	record_type output_vector_length: integer
 	record_type outbound_connections: [pid]
 
 end

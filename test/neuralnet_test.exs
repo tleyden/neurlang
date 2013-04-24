@@ -17,7 +17,7 @@ defmodule NeuralNetworkTest do
 		neuron = Neuron.new( id: make_ref(), bias: 10, activation_function: function(identity/1) )
 		neuron = NeuronProcess.start_link( neuron)
 
-		sensor = Sensor.new( id: make_ref(), output_vector_length: 5, sync_function: function(sync_function/0) )
+		sensor = Sensor.new( id: make_ref(), sync_function: function(sync_function/0) )
 		sensor = SensorProcess.start_link( sensor ) 
 
 		actuator = Actuator.new( id: make_ref() )
