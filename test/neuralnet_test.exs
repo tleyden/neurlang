@@ -73,7 +73,7 @@ defmodule NeuralNetworkTest do
 		neuron_a2_1 = NeuronProcess.add_inbound_connection( neuron_a2_1, sensor_x2, weight([20]) )
 
 		sensor_x2 = SensorProcess.add_outbound_connection( sensor_x2, neuron_a2_2 )
- 		neuron_a2_2 = NeuronProcess.add_inbound_connection( neuron_a2_2, sensor_x2, weight([-10]) )
+ 		neuron_a2_2 = NeuronProcess.add_inbound_connection( neuron_a2_2, sensor_x2, weight([-20]) )
 
 		neuron_a2_1 = NeuronProcess.add_outbound_connection( neuron_a2_1, neuron_a3_1 )
 		neuron_a3_1 = NeuronProcess.add_inbound_connection( neuron_a3_1, neuron_a2_1, weight([20]) )
@@ -87,11 +87,24 @@ defmodule NeuralNetworkTest do
 		# tap into actuator for testing purposes
 		_actuator = ActuatorProcess.add_outbound_connection( actuator, MockNode.new( pid: self() ) )
 
-		# trigger sensors to feed data into the network
+		# x1 = 0, x2 = 0 -> 1
 		SensorProcess.sync(sensor_x1)
 		SensorProcess.sync(sensor_x2)
+		assert actuator_next_output() > 0.99
 
-		# verify actuator output
+		# x1 = 0, x2 = 1 -> 0
+		SensorProcess.sync(sensor_x1)
+		SensorProcess.sync(sensor_x2)
+		assert actuator_next_output() < 0.01
+
+		# x1 = 1, x2 = 0 -> 0
+		SensorProcess.sync(sensor_x1)
+		SensorProcess.sync(sensor_x2)
+		assert actuator_next_output() < 0.01
+
+		# x1 = 1, x2 = 1 -> 1
+		SensorProcess.sync(sensor_x1)
+		SensorProcess.sync(sensor_x2)
 		assert actuator_next_output() > 0.99
 
 	end
