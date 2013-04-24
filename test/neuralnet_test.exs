@@ -10,6 +10,9 @@ defmodule NeuralNetworkTest do
 	alias Neurlang.NodeProcess, as: SensorProcess
 	alias Neurlang.Actuator, as: Actuator
 	alias Neurlang.NodeProcess, as: ActuatorProcess
+	alias Neurlang.Connector, as: Connector
+
+	import Connector, only: [connect: 1]
 
 	test "create a full neural net with one neuron and feed data through it" do
 
@@ -63,8 +66,10 @@ defmodule NeuralNetworkTest do
 		actuator = ActuatorProcess.start_link( actuator )
 
 		# Wire up network
-		sensor_x1 = SensorProcess.add_outbound_connection( sensor_x1, neuron_a2_1 ) 
-		neuron_a2_1 = NeuronProcess.add_inbound_connection( neuron_a2_1, sensor_x1, weight([20]) )
+
+		{ sensor_x1, neuron_a2_1 } = connect( from: sensor_x1, to: neuron_a2_1, weights: [20] )
+
+
 
 		sensor_x1 = SensorProcess.add_outbound_connection( sensor_x1, neuron_a2_2 )
  		neuron_a2_2 = NeuronProcess.add_inbound_connection( neuron_a2_2, sensor_x1, weight([-20]) )
