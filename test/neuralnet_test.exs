@@ -35,10 +35,71 @@ defmodule NeuralNetworkTest do
 		# feed intput into sensor
 		SensorProcess.sync(sensor)
 
-		# wait for output from actuator 
+		# verify actuator output
+		assert actuator_next_output() == 110
+
+	end
+
+	test "neural net which can solve the XNOR problem.  no learning involved (class.coursera.org/ml/lecture/48)" do
+
+		sensor_x1_val_generator = MathUtil.create_generator( [[0], [0], [1], [1]] )
+		sensor_x1 = Sensor.new( id: make_ref(), sync_function: sensor_x1_val_generator )
+		sensor_x1 = SensorProcess.start_link( sensor_x1 ) 
+
+		sensor_x2_val_generator = MathUtil.create_generator( [[0], [1], [0], [1]] )
+		sensor_x2 = Sensor.new( id: make_ref(), sync_function: sensor_x2_val_generator )
+		sensor_x2 = SensorProcess.start_link( sensor_x2 ) 
+
+		neuron_a2_1 = Neuron.new( id: make_ref(), bias: -30, activation_function: function(sigmoid/1) )
+		neuron_a2_1 = NeuronProcess.start_link( neuron_a2_1 )
+
+		neuron_a2_2 = Neuron.new( id: make_ref(), bias: 10, activation_function: function(sigmoid/1) )
+		neuron_a2_2 = NeuronProcess.start_link( neuron_a2_2 )
+
+		neuron_a3_1 = Neuron.new( id: make_ref(), bias: -10, activation_function: function(sigmoid/1) )
+		neuron_a3_1 = NeuronProcess.start_link( neuron_a3_1 )
+
+		actuator = Actuator.new( id: make_ref() )
+		actuator = ActuatorProcess.start_link( actuator )
+
+		# Wire up network
+		sensor_x1 = SensorProcess.add_outbound_connection( sensor_x1, neuron_a2_1 ) 
+		neuron_a2_1 = NeuronProcess.add_inbound_connection( neuron_a2_1, sensor_x1, weight([20]) )
+
+		sensor_x1 = SensorProcess.add_outbound_connection( sensor_x1, neuron_a2_2 )
+ 		neuron_a2_2 = NeuronProcess.add_inbound_connection( neuron_a2_2, sensor_x1, weight([-20]) )
+
+		sensor_x2 = SensorProcess.add_outbound_connection( sensor_x2, neuron_a2_1 ) 
+		neuron_a2_1 = NeuronProcess.add_inbound_connection( neuron_a2_1, sensor_x2, weight([20]) )
+
+		sensor_x2 = SensorProcess.add_outbound_connection( sensor_x2, neuron_a2_2 )
+ 		neuron_a2_2 = NeuronProcess.add_inbound_connection( neuron_a2_2, sensor_x2, weight([-10]) )
+
+		neuron_a2_1 = NeuronProcess.add_outbound_connection( neuron_a2_1, neuron_a3_1 )
+		neuron_a3_1 = NeuronProcess.add_inbound_connection( neuron_a3_1, neuron_a2_1, weight([20]) )
+
+		neuron_a2_2 = NeuronProcess.add_outbound_connection( neuron_a2_2, neuron_a3_1 )
+		neuron_a3_1 = NeuronProcess.add_inbound_connection( neuron_a3_1, neuron_a2_2, weight([20]) )
+
+		neuron_a3_1 = NeuronProcess.add_outbound_connection( neuron_a3_1, actuator )
+		actuator = ActuatorProcess.add_inbound_connection( actuator, neuron_a3_1 )
+
+		# tap into actuator for testing purposes
+		_actuator = ActuatorProcess.add_outbound_connection( actuator, MockNode.new( pid: self() ) )
+
+		# trigger sensors to feed data into the network
+		SensorProcess.sync(sensor_x1)
+		SensorProcess.sync(sensor_x2)
+
+		# verify actuator output
+		assert actuator_next_output() > 0.99
+
+	end
+
+	def actuator_next_output() do
 		receive do
-			{_pid, :forward, output} -> 
-				assert output == [ 110 ]  
+			{ _pid, :forward, [ output ] } -> 
+				output
 			any ->
 				assert false, "Got unexpected message: #{inspect(any)}"
 		after
@@ -47,22 +108,12 @@ defmodule NeuralNetworkTest do
 
 	end
 
-
-	test "neural net which can solve the XNOR problem.  no learning involved (class.coursera.org/ml/lecture/48)" do
-
-		#sensor = Sensor.new( id: make_ref(), output_vector_length: 1, sync_function: function(xnor_sync_function/1) )
-		#sensor = SensorProcess.start_link( sensor ) 
-
-		next = MathUtil.create_generator([0, 1, 1, 0])
-		assert next.() == 0
-		assert next.() == 1
-		assert next.() == 1
-		assert next.() == 0
-
-	end
-
 	def identity(x) do
 		x
+	end
+
+	def sigmoid(x) do
+		MathUtil.sigmoid(x)
 	end
 
 	def sync_function() do
