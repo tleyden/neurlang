@@ -19,17 +19,17 @@ defmodule Neurlang.MathUtil do
 		assert f.() == 1
 
   """
-	@spec create_generator(list) :: fun 
+	@spec create_generator(list) :: (fun() -> term) 
 	def create_generator(values) do
-		receiver_pid = Process.spawn __MODULE__, :generator, [values]
-		f = fn() ->
-						receiver_pid <- self()
-						receive do
-							returnval ->
-								returnval
-						end
+		generator_pid = Process.spawn __MODULE__, :generator, [values]
+		fn() ->
+				msg = self()
+				generator_pid <- msg  # tell generator we want a new value
+				receive do
+					returnval ->
+						returnval
 				end
-		f
+		end
 	end
 
 
