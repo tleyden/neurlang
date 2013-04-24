@@ -27,7 +27,7 @@ defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: ni
   """
 	record_type id: reference
 	record_type pid: pid
-	record_type activation_function: fun
+	record_type activation_function: (fun(number) -> number)
 	record_type bias: number
 	record_type inbound_connections: [{pid, list}]
 	record_type outbound_connections: [pid]

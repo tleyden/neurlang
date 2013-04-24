@@ -23,7 +23,7 @@ defrecord Neurlang.Sensor, id: nil, pid: nil, sync_function: nil, output_vector_
   """
 	record_type id: reference
 	record_type pid: pid
-	record_type sync_function: fun
+	record_type sync_function: (fun(any) -> [number])
 	record_type output_vector_length: integer
 	record_type outbound_connections: [pid]
 
