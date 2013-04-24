@@ -4,6 +4,7 @@ defmodule NeuralNetworkTest do
 
   use ExUnit.Case
 	alias Neurlang.Neuron, as: Neuron
+	alias Neurlang.MathUtil, as: MathUtil
 	alias Neurlang.NodeProcess, as: NeuronProcess
 	alias Neurlang.Sensor, as: Sensor
 	alias Neurlang.NodeProcess, as: SensorProcess
@@ -43,6 +44,20 @@ defmodule NeuralNetworkTest do
 		after
 			1000 -> assert false, "Did not receive any output from actuator in time"
 		end
+
+	end
+
+
+	test "neural net which can solve the XNOR problem.  no learning involved (class.coursera.org/ml/lecture/48)" do
+
+		#sensor = Sensor.new( id: make_ref(), output_vector_length: 1, sync_function: function(xnor_sync_function/1) )
+		#sensor = SensorProcess.start_link( sensor ) 
+
+		f = MathUtil.create_generator([0, 1, 1, 0])
+		assert f.(nil) == 0
+		assert f.(nil) == 1
+		assert f.(nil) == 1
+		assert f.(nil) == 0
 
 	end
 
