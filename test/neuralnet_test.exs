@@ -20,7 +20,7 @@ defmodule NeuralNetworkTest do
 
 		# Create nodes
 		neuron = neuron( id: make_ref(), bias: 10, activation_function: function(identity/1) )
-		sensor = sensor( id: make_ref(), sync_function: function(sync_function/0) )
+		sensor = sensor( id: make_ref(), sync_function: fake_sensor_data( [ [1, 1, 1, 1, 1] ] ) )
 		actuator = actuator( id: make_ref() )
 
 		# Wire up network
@@ -40,13 +40,9 @@ defmodule NeuralNetworkTest do
 
 	test "neural net which can solve the XNOR problem.  no learning involved (class.coursera.org/ml/lecture/48)" do
 
-		# Create values that the sensors will generate
-		sensor_x1_val_generator = MathUtil.create_generator( [[0], [0], [1], [1]] )
-		sensor_x2_val_generator = MathUtil.create_generator( [[0], [1], [0], [1]] )
-
 		# Create nodes
-		sensor_x1 = sensor( id: make_ref(), sync_function: sensor_x1_val_generator )
-		sensor_x2 = sensor( id: make_ref(), sync_function: sensor_x2_val_generator )
+		sensor_x1 = sensor( id: make_ref(), sync_function: fake_sensor_data( [[0], [0], [1], [1]] ) )
+		sensor_x2 = sensor( id: make_ref(), sync_function: fake_sensor_data( [[0], [1], [0], [1]] ) )
 		neuron_a2_1 = neuron( id: make_ref(), bias: -30, activation_function: function(sigmoid/1) )
 		neuron_a2_2 = neuron( id: make_ref(), bias: 10, activation_function: function(sigmoid/1) )
 		neuron_a3_1 = neuron( id: make_ref(), bias: -10, activation_function: function(sigmoid/1) )
@@ -82,6 +78,10 @@ defmodule NeuralNetworkTest do
 
 	end
 
+	def fake_sensor_data(outputs) do
+		MathUtil.create_generator( outputs )
+	end
+
 	def actuator_next_output() do
 		receive do
 			{ _pid, :forward, [ output ] } -> 
@@ -105,14 +105,6 @@ defmodule NeuralNetworkTest do
 
 	def sigmoid(x) do
 		MathUtil.sigmoid(x)
-	end
-
-	def sync_function() do
-		[1, 1, 1, 1, 1]
-	end 
-
-	def weight(x) do
-		x
 	end
 
 end
