@@ -11,20 +11,17 @@ defmodule NeuralNetworkTest do
 	alias Neurlang.Actuator, as: Actuator
 	alias Neurlang.NodeProcess, as: ActuatorProcess
 	alias Neurlang.Connector, as: Connector
+	alias Neurlang.Constructor, as: Constructor
 
 	import Connector, only: [connect: 1, connect_without_weights: 1]
+	import Constructor, only: [neuron: 1, sensor: 1, actuator: 1]
 
 	test "create a full neural net with one neuron and feed data through it" do
 
 		# Create nodes
-		neuron = Neuron.new( id: make_ref(), bias: 10, activation_function: function(identity/1) )
-		neuron = NeuronProcess.start_link( neuron)
-
-		sensor = Sensor.new( id: make_ref(), sync_function: function(sync_function/0) )
-		sensor = SensorProcess.start_link( sensor ) 
-
-		actuator = Actuator.new( id: make_ref() )
-		actuator = ActuatorProcess.start_link( actuator )
+		neuron = neuron( id: make_ref(), bias: 10, activation_function: function(identity/1) )
+		sensor = sensor( id: make_ref(), sync_function: function(sync_function/0) )
+		actuator = actuator( id: make_ref() )
 
 		# Wire up network
 		{ sensor, _neuron } = connect( from: sensor, to: neuron, weights: [20, 20, 20, 20, 20] )
@@ -43,25 +40,17 @@ defmodule NeuralNetworkTest do
 
 	test "neural net which can solve the XNOR problem.  no learning involved (class.coursera.org/ml/lecture/48)" do
 
+		# Create values that the sensors will generate
 		sensor_x1_val_generator = MathUtil.create_generator( [[0], [0], [1], [1]] )
-		sensor_x1 = Sensor.new( id: make_ref(), sync_function: sensor_x1_val_generator )
-		sensor_x1 = SensorProcess.start_link( sensor_x1 ) 
-
 		sensor_x2_val_generator = MathUtil.create_generator( [[0], [1], [0], [1]] )
-		sensor_x2 = Sensor.new( id: make_ref(), sync_function: sensor_x2_val_generator )
-		sensor_x2 = SensorProcess.start_link( sensor_x2 ) 
 
-		neuron_a2_1 = Neuron.new( id: make_ref(), bias: -30, activation_function: function(sigmoid/1) )
-		neuron_a2_1 = NeuronProcess.start_link( neuron_a2_1 )
-
-		neuron_a2_2 = Neuron.new( id: make_ref(), bias: 10, activation_function: function(sigmoid/1) )
-		neuron_a2_2 = NeuronProcess.start_link( neuron_a2_2 )
-
-		neuron_a3_1 = Neuron.new( id: make_ref(), bias: -10, activation_function: function(sigmoid/1) )
-		neuron_a3_1 = NeuronProcess.start_link( neuron_a3_1 )
-
-		actuator = Actuator.new( id: make_ref() )
-		actuator = ActuatorProcess.start_link( actuator )
+		# Create nodes
+		sensor_x1 = sensor( id: make_ref(), sync_function: sensor_x1_val_generator )
+		sensor_x2 = sensor( id: make_ref(), sync_function: sensor_x2_val_generator )
+		neuron_a2_1 = neuron( id: make_ref(), bias: -30, activation_function: function(sigmoid/1) )
+		neuron_a2_2 = neuron( id: make_ref(), bias: 10, activation_function: function(sigmoid/1) )
+		neuron_a3_1 = neuron( id: make_ref(), bias: -10, activation_function: function(sigmoid/1) )
+		actuator = actuator( id: make_ref() )
 
 		# Wire up network
 		{ sensor_x1, _neuron_a2_1 } = connect( from: sensor_x1, to: neuron_a2_1, weights: [20] )
@@ -76,23 +65,19 @@ defmodule NeuralNetworkTest do
 		_actuator = ActuatorProcess.add_outbound_connection( actuator, MockNode.new( pid: self() ) )
 
 		# x1 = 0, x2 = 0 -> 1
-		SensorProcess.sync(sensor_x1)
-		SensorProcess.sync(sensor_x2)
+		sync_sensors( sensor_x1, sensor_x2 )
 		assert actuator_next_output() > 0.99
 
 		# x1 = 0, x2 = 1 -> 0
-		SensorProcess.sync(sensor_x1)
-		SensorProcess.sync(sensor_x2)
+		sync_sensors( sensor_x1, sensor_x2 )
 		assert actuator_next_output() < 0.01
 
-		# x1 = 1, x2 = 0 -> 0
-		SensorProcess.sync(sensor_x1)
-		SensorProcess.sync(sensor_x2)
+		# x1 = 1, x2 = 0 -> 
+		sync_sensors( sensor_x1, sensor_x2 )
 		assert actuator_next_output() < 0.01
 
 		# x1 = 1, x2 = 1 -> 1
-		SensorProcess.sync(sensor_x1)
-		SensorProcess.sync(sensor_x2)
+		sync_sensors( sensor_x1, sensor_x2 )
 		assert actuator_next_output() > 0.99
 
 	end
@@ -107,6 +92,11 @@ defmodule NeuralNetworkTest do
 			1000 -> assert false, "Did not receive any output from actuator in time"
 		end
 
+	end
+
+	def sync_sensors(sensor_x1, sensor_x2) do
+		SensorProcess.sync(sensor_x1)
+		SensorProcess.sync(sensor_x2)
 	end
 
 	def identity(x) do
