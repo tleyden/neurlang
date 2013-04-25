@@ -12,7 +12,7 @@ defmodule NeuralNetworkTest do
 	alias Neurlang.NodeProcess, as: ActuatorProcess
 	alias Neurlang.Connector, as: Connector
 
-	import Connector, only: [connect: 1]
+	import Connector, only: [connect: 1, connect_without_weights: 1]
 
 	test "create a full neural net with one neuron and feed data through it" do
 
@@ -27,10 +27,8 @@ defmodule NeuralNetworkTest do
 		actuator = ActuatorProcess.start_link( actuator )
 
 		# Wire up network
-		sensor = SensorProcess.add_outbound_connection( sensor, neuron ) 
-		neuron = NeuronProcess.add_inbound_connection( neuron, sensor, weight([20, 20, 20, 20, 20]) ) 
-		neuron = NeuronProcess.add_outbound_connection( neuron, actuator )
-		actuator = ActuatorProcess.add_inbound_connection( actuator, neuron )
+		{ sensor, _neuron } = connect( from: sensor, to: neuron, weights: [20, 20, 20, 20, 20] )
+		{ _neuron, actuator } = connect_without_weights( from: neuron, to: actuator )
 
 		# tap into actuator for testing purposes
 		_actuator = ActuatorProcess.add_outbound_connection( actuator, MockNode.new( pid: self() ) )
@@ -66,28 +64,13 @@ defmodule NeuralNetworkTest do
 		actuator = ActuatorProcess.start_link( actuator )
 
 		# Wire up network
-
-		{ sensor_x1, neuron_a2_1 } = connect( from: sensor_x1, to: neuron_a2_1, weights: [20] )
-
-
-
-		sensor_x1 = SensorProcess.add_outbound_connection( sensor_x1, neuron_a2_2 )
- 		neuron_a2_2 = NeuronProcess.add_inbound_connection( neuron_a2_2, sensor_x1, weight([-20]) )
-
-		sensor_x2 = SensorProcess.add_outbound_connection( sensor_x2, neuron_a2_1 ) 
-		neuron_a2_1 = NeuronProcess.add_inbound_connection( neuron_a2_1, sensor_x2, weight([20]) )
-
-		sensor_x2 = SensorProcess.add_outbound_connection( sensor_x2, neuron_a2_2 )
- 		neuron_a2_2 = NeuronProcess.add_inbound_connection( neuron_a2_2, sensor_x2, weight([-20]) )
-
-		neuron_a2_1 = NeuronProcess.add_outbound_connection( neuron_a2_1, neuron_a3_1 )
-		neuron_a3_1 = NeuronProcess.add_inbound_connection( neuron_a3_1, neuron_a2_1, weight([20]) )
-
-		neuron_a2_2 = NeuronProcess.add_outbound_connection( neuron_a2_2, neuron_a3_1 )
-		neuron_a3_1 = NeuronProcess.add_inbound_connection( neuron_a3_1, neuron_a2_2, weight([20]) )
-
-		neuron_a3_1 = NeuronProcess.add_outbound_connection( neuron_a3_1, actuator )
-		actuator = ActuatorProcess.add_inbound_connection( actuator, neuron_a3_1 )
+		{ sensor_x1, _neuron_a2_1 } = connect( from: sensor_x1, to: neuron_a2_1, weights: [20] )
+		{ sensor_x1, _neuron_a2_2 } = connect( from: sensor_x1, to: neuron_a2_2, weights: [-20] )
+		{ sensor_x2, _neuron_a2_1 } = connect( from: sensor_x2, to: neuron_a2_1, weights: [20] )
+		{ sensor_x2, _neuron_a2_2 } = connect( from: sensor_x2, to: neuron_a2_2, weights: [-20] )
+		{ _neuron_a2_1, _neuron_a3_1 } = connect( from: neuron_a2_1, to: neuron_a3_1, weights: [20] )
+		{ _neuron_a2_2, _neuron_a3_1 } = connect( from: neuron_a2_2, to: neuron_a3_1, weights: [20] )
+		{ _neuron_a3_1, actuator } = connect_without_weights( from: neuron_a3_1, to: actuator )  # todo use pattern matching, same function name
 
 		# tap into actuator for testing purposes
 		_actuator = ActuatorProcess.add_outbound_connection( actuator, MockNode.new( pid: self() ) )
