@@ -13,7 +13,7 @@ defmodule NeuralNetworkTest do
 	alias Neurlang.Connector, as: Connector
 	alias Neurlang.Constructor, as: Constructor
 
-	import Connector, only: [connect: 1, connect_without_weights: 1]
+	import Connector, only: [connect: 1]
 	import Constructor, only: [neuron: 1, sensor: 1, actuator: 1]
 
 	test "create a full neural net with one neuron and feed data through it" do
@@ -25,7 +25,7 @@ defmodule NeuralNetworkTest do
 
 		# Wire up network
 		{ sensor, _neuron } = connect( from: sensor, to: neuron, weights: [20, 20, 20, 20, 20] )
-		{ _neuron, actuator } = connect_without_weights( from: neuron, to: actuator )
+		{ _neuron, actuator } = connect( from: neuron, to: actuator )
 
 		# tap into actuator for testing purposes
 		_actuator = ActuatorProcess.add_outbound_connection( actuator, MockNode.new( pid: self() ) )
@@ -59,7 +59,7 @@ defmodule NeuralNetworkTest do
 		{ sensor_x2, _neuron_a2_2 } = connect( from: sensor_x2, to: neuron_a2_2, weights: [-20] )
 		{ _neuron_a2_1, _neuron_a3_1 } = connect( from: neuron_a2_1, to: neuron_a3_1, weights: [20] )
 		{ _neuron_a2_2, _neuron_a3_1 } = connect( from: neuron_a2_2, to: neuron_a3_1, weights: [20] )
-		{ _neuron_a3_1, actuator } = connect_without_weights( from: neuron_a3_1, to: actuator ) 
+		{ _neuron_a3_1, actuator } = connect( from: neuron_a3_1, to: actuator ) 
 
 		# tap into actuator for testing purposes
 		_actuator = ActuatorProcess.add_outbound_connection( actuator, MockNode.new( pid: self() ) )
@@ -72,7 +72,7 @@ defmodule NeuralNetworkTest do
 		sync_sensors( sensor_x1, sensor_x2 )
 		assert actuator_next_output() < 0.01
 
-		# x1 = 1, x2 = 0 -> 
+		# x1 = 1, x2 = 0 -> 0
 		sync_sensors( sensor_x1, sensor_x2 )
 		assert actuator_next_output() < 0.01
 
