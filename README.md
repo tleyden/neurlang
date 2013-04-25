@@ -18,7 +18,7 @@ ___Status: Neurlang is still in the process of being built, and is therefore is 
 
     # Create nodes
     neuron = neuron( id: make_ref(), bias: 10, activation_function: function(identity/1) )
-    sensor = sensor( id: make_ref(), sync_function: function(sync_function/0) )
+    sensor = sensor( id: make_ref(), sync_function: fake_sensor_data( [ [1, 1, 1, 1, 1] ] ) )
     actuator = actuator( id: make_ref() )
 
     # Wire up network
@@ -28,7 +28,7 @@ ___Status: Neurlang is still in the process of being built, and is therefore is 
     # tap into actuator for testing purposes
     _actuator = ActuatorProcess.add_outbound_connection( actuator, MockNode.new( pid: self() ) )
 
-    # trigger sensor to send fake values
+    # feed intput into sensor
     SensorProcess.sync(sensor)
 
     # verify actuator output
