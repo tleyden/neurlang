@@ -59,7 +59,7 @@ defmodule NeuralNetworkTest do
 		{ sensor_x2, _neuron_a2_2 } = connect( from: sensor_x2, to: neuron_a2_2, weights: [-20] )
 		{ _neuron_a2_1, _neuron_a3_1 } = connect( from: neuron_a2_1, to: neuron_a3_1, weights: [20] )
 		{ _neuron_a2_2, _neuron_a3_1 } = connect( from: neuron_a2_2, to: neuron_a3_1, weights: [20] )
-		{ _neuron_a3_1, actuator } = connect_without_weights( from: neuron_a3_1, to: actuator )  # todo use pattern matching, same function name
+		{ _neuron_a3_1, actuator } = connect_without_weights( from: neuron_a3_1, to: actuator ) 
 
 		# tap into actuator for testing purposes
 		_actuator = ActuatorProcess.add_outbound_connection( actuator, MockNode.new( pid: self() ) )
