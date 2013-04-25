@@ -16,38 +16,24 @@ ___Status: Neurlang is still in the process of being built, and is therefore is 
 
 # Using Neurlang
 
-    # Create nodes 
-    neuron = Neuron.new( bias: bias(10), activation_function: function(:identity, 1) )
-    neuron = NeuronProcess.start_link( neuron)
-
-    sensor = Sensor.new( output_vector_length: 5 )
-    sensor = SensorProcess.start_link( sensor )
-
-    actuator = Actuator.new()
-    actuator = ActuatorProcess.start_link( actuator )
+    # Create nodes
+    neuron = neuron( id: make_ref(), bias: 10, activation_function: function(identity/1) )
+    sensor = sensor( id: make_ref(), sync_function: function(sync_function/0) )
+    actuator = actuator( id: make_ref() )
 
     # Wire up network
-    sensor = SensorProcess.add_outbound_connection( sensor, neuron )
-    neuron = NeuronProcess.add_inbound_connection( neuron, sensor, weight([20, 20, 20, 20, 20]) )
-
-    neuron = NeuronProcess.add_outbound_connection( neuron, actuator )
-    actuator = ActuatorProcess.add_inbound_connection( actuator, neuron )
+    { sensor, _neuron } = connect( from: sensor, to: neuron, weights: [20, 20, 20, 20, 20] )
+    { _neuron, actuator } = connect( from: neuron, to: actuator )
 
     # tap into actuator for testing purposes
-    actuator = ActuatorProcess.add_outbound_connection( actuator, MockNode.new( pid: self() ) )
+    _actuator = ActuatorProcess.add_outbound_connection( actuator, MockNode.new( pid: self() ) )
 
-    # feed intput into sensor
-    SensorProcess.sync_with_outputs(sensor, [1, 1, 1, 1, 1])
+    # trigger sensor to send fake values
+    SensorProcess.sync(sensor)
 
-    # wait for output from actuator
-    value = receive do
-      {pid, :forward, output} ->
-        assert output == [ 110 ]
-      any ->
-        assert false, "Got unexpected message: #{inspect(any)}"
-    after
-      1000 -> assert false, "Did not receive any output from actuator in time"
-    end
+    # verify actuator output
+    assert actuator_next_output() == 110
+
 
 # Architecture
 
