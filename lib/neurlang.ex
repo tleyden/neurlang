@@ -12,6 +12,8 @@ defmodule Neurlang do
     end
   end
 
-  @type neurlang_node :: Actuator.t | Neuron.t | Sensor.t
-  @type barrier_entry :: {pid, list(number)}
+	@type neurlang_node :: Actuator.t | Neuron.t | Sensor.t
+	@type barrier_entry :: {pid, list(number)}
+	@type handle_call_msg :: { :add_inbound_connection | :add_outbound_connection, {neurlang_node, list(number) } | neurlang_node }
+
 end
