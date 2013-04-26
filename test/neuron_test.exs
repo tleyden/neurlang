@@ -2,11 +2,7 @@ Code.require_file "../test_helper.exs", __FILE__
 
 defmodule NeuronTest do
   use ExUnit.Case
-	alias Neurlang.Neuron, as: Neuron
-	alias Neurlang.Sensor, as: Sensor
-	alias Neurlang.Actuator, as: Actuator
-	alias Neurlang.ConnectedNode, as: ConnectedNode
-	alias Neurlang.Accumulator, as: Accumulator
+  use Neurlang
 
 	test "compute output" do 
 

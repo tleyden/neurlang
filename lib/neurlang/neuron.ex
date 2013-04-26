@@ -1,8 +1,7 @@
 
-
-alias Neurlang.Neuron, as: Neuron
-alias Neurlang.Accumulator, as: Accumulator
 alias Neurlang.ConnectedNode, as: ConnectedNode
+alias Neurlang.Accumulator, as: Accumulator
+alias Neurlang.Neuron, as: Neuron
 
 defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: nil, 
 										       inbound_connections: [], outbound_connections: [], barrier: HashDict.new do
@@ -25,6 +24,7 @@ defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: ni
 	* `barrier` - used to wait until receiving inputs from all connected input nodes before sending output
 
   """
+
 	record_type id: reference
 	record_type pid: pid
 	record_type activation_function: (fun(number) -> number)

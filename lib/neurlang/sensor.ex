@@ -1,6 +1,6 @@
 
-alias Neurlang.Accumulator, as: Accumulator
 alias Neurlang.ConnectedNode, as: ConnectedNode
+alias Neurlang.Accumulator, as: Accumulator
 alias Neurlang.Sensor, as: Sensor
 
 defrecord Neurlang.Sensor, id: nil, pid: nil, sync_function: nil, outbound_connections: []  do

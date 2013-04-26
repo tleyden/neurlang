@@ -1,6 +1,9 @@
 defmodule Neurlang do
   defmacro __using__(_) do
     quote do
+			alias Neurlang.Constructor, as: Constructor
+			alias Neurlang.ConnectedNode, as: ConnectedNode
+			alias Neurlang.Accumulator, as: Accumulator
       alias Neurlang.Neuron, as: Neuron
       alias Neurlang.NodeProcess, as: NeuronProcess
       alias Neurlang.Sensor, as: Sensor

@@ -11,8 +11,7 @@ defmodule Neurlang.NodeProcess do
 	The gen_server state is represented by the appropriate node record (sensor, neuron, actuator).
   """
 	use GenServer.Behaviour
-	alias Neurlang.Accumulator, as: Accumulator
-	alias Neurlang.ConnectedNode, as: ConnectedNode
+	use Neurlang
 
 	## API
 

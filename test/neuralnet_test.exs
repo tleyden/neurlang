@@ -3,15 +3,7 @@ Code.require_file "../test_helper.exs", __FILE__
 defmodule NeuralNetworkTest do
 
   use ExUnit.Case
-	alias Neurlang.Neuron, as: Neuron
-	alias Neurlang.MathUtil, as: MathUtil
-	alias Neurlang.NodeProcess, as: NeuronProcess
-	alias Neurlang.Sensor, as: Sensor
-	alias Neurlang.NodeProcess, as: SensorProcess
-	alias Neurlang.Actuator, as: Actuator
-	alias Neurlang.NodeProcess, as: ActuatorProcess
-	alias Neurlang.Connector, as: Connector
-	alias Neurlang.Constructor, as: Constructor
+	use Neurlang
 
 	import Connector, only: [connect: 1]
 	import Constructor, only: [neuron: 1, sensor: 1, actuator: 1]

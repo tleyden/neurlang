@@ -1,11 +1,11 @@
 
+alias Neurlang.ConnectedNode, as: ConnectedNode
 alias Neurlang.Accumulator, as: Accumulator
 alias Neurlang.Actuator, as: Actuator
-alias Neurlang.ConnectedNode, as: ConnectedNode
 
 defrecord Neurlang.Actuator, id: nil, pid: nil, inbound_connections: [], outbound_connections: [], 
 										         barrier: HashDict.new do
-
+ 
   @moduledoc """
   Metadata for the Actuator node:
 
@@ -21,7 +21,6 @@ defrecord Neurlang.Actuator, id: nil, pid: nil, inbound_connections: [], outboun
 	* `barrier` - used to wait until receiving inputs from all connected input nodes before sending output
 
   """
-
 	record_type id: reference
 	record_type pid: pid
 	record_type inbound_connections: [pid]
