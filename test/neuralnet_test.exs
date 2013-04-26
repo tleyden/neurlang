@@ -7,7 +7,7 @@ defmodule NeuralNetworkTest do
 
 	import Connector, only: [connect: 1]
 
-	test "create a full neural net with one neuron and feed data through it" do
+	test "neural net with one neuron and identify activation function.  feed data through it and check result" do
 
 		# Create nodes
 		neuron = Neuron.start_node(id: make_ref(), bias: 10, activation_function: function(identity/1))
