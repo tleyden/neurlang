@@ -25,6 +25,8 @@ defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: ni
 
   """
 
+	use Neurlang
+
 	record_type id: reference
 	record_type pid: pid
 	record_type activation_function: (fun(number) -> number)
@@ -32,6 +34,13 @@ defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: ni
 	record_type inbound_connections: [{pid, list}]
 	record_type outbound_connections: [pid]
 	record_type barrier: Dict
+
+	@spec start_node(Neuron.options) :: Neuron.t
+	def start_node(keywords) do
+		neuron = Neuron.new(keywords)
+		NeuronProcess.start_link(neuron)
+	end
+
 
 end
 

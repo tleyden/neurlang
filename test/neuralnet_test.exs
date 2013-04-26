@@ -6,14 +6,13 @@ defmodule NeuralNetworkTest do
 	use Neurlang
 
 	import Connector, only: [connect: 1]
-	import Constructor, only: [neuron: 1, sensor: 1, actuator: 1]
 
 	test "create a full neural net with one neuron and feed data through it" do
 
 		# Create nodes
-		neuron = neuron( id: make_ref(), bias: 10, activation_function: function(identity/1) )
-		sensor = sensor( id: make_ref(), sync_function: fake_sensor_data( [ [1, 1, 1, 1, 1] ] ) )
-		actuator = actuator( id: make_ref() )
+		neuron = Neuron.start_node( id: make_ref(), bias: 10, activation_function: function(identity/1) )
+		sensor = Sensor.start_node( id: make_ref(), sync_function: fake_sensor_data( [ [1, 1, 1, 1, 1] ] ) )
+		actuator = Actuator.start_node( id: make_ref() )
 
 		# Wire up network
 		{ sensor, _neuron } = connect( from: sensor, to: neuron, weights: [20, 20, 20, 20, 20] )
@@ -33,12 +32,12 @@ defmodule NeuralNetworkTest do
 	test "neural net which can solve the XNOR problem.  no learning involved (class.coursera.org/ml/lecture/48)" do
 
 		# Create nodes
-		sensor_x1 = sensor( id: make_ref(), sync_function: fake_sensor_data( [[0], [0], [1], [1]] ) )
-		sensor_x2 = sensor( id: make_ref(), sync_function: fake_sensor_data( [[0], [1], [0], [1]] ) )
-		neuron_a2_1 = neuron( id: make_ref(), bias: -30, activation_function: function(sigmoid/1) )
-		neuron_a2_2 = neuron( id: make_ref(), bias: 10, activation_function: function(sigmoid/1) )
-		neuron_a3_1 = neuron( id: make_ref(), bias: -10, activation_function: function(sigmoid/1) )
-		actuator = actuator( id: make_ref() )
+		sensor_x1 = Sensor.start_node( id: make_ref(), sync_function: fake_sensor_data( [[0], [0], [1], [1]] ) )
+		sensor_x2 = Sensor.start_node( id: make_ref(), sync_function: fake_sensor_data( [[0], [1], [0], [1]] ) )
+		neuron_a2_1 = Neuron.start_node( id: make_ref(), bias: -30, activation_function: function(sigmoid/1) )
+		neuron_a2_2 = Neuron.start_node( id: make_ref(), bias: 10, activation_function: function(sigmoid/1) )
+		neuron_a3_1 = Neuron.start_node( id: make_ref(), bias: -10, activation_function: function(sigmoid/1) )
+		actuator = Actuator.start_node( id: make_ref() )
 
 		# Wire up network
 		{ sensor_x1, _neuron_a2_1 } = connect( from: sensor_x1, to: neuron_a2_1, weights: [20] )

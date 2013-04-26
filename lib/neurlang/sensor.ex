@@ -18,10 +18,18 @@ defrecord Neurlang.Sensor, id: nil, pid: nil, sync_function: nil, outbound_conne
 	* `outbound_connections` - a list of pid's of output nodes this sensor should send output to
 
   """
+	use Neurlang
+
 	record_type id: reference
 	record_type pid: pid
 	record_type sync_function: (fun(any) -> [number])
 	record_type outbound_connections: [pid]
+
+	@spec start_node(Sensor.options) :: Sensor.t
+	def start_node(keywords) do
+		sensor = Sensor.new(keywords)
+		SensorProcess.start_link(sensor)
+	end
 
 end
 

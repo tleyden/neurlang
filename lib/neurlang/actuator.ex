@@ -21,11 +21,19 @@ defrecord Neurlang.Actuator, id: nil, pid: nil, inbound_connections: [], outboun
 	* `barrier` - used to wait until receiving inputs from all connected input nodes before sending output
 
   """
+	use Neurlang
+
 	record_type id: reference
 	record_type pid: pid
 	record_type inbound_connections: [pid]
 	record_type outbound_connections: [pid]
 	record_type barrier: Dict
+
+	@spec start_node(Actuator.options) :: Actuator.t
+	def start_node(keywords) do
+		actuator = Actuator.new(keywords)
+		ActuatorProcess.start_link(actuator)
+	end
 
 end
 
