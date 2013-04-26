@@ -38,7 +38,8 @@ defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: ni
 	@spec start_node(Neuron.options) :: Neuron.t
 	def start_node(keywords) do
 		neuron = Neuron.new(keywords)
-		NodeProcess.start_link(neuron)
+		{:ok, pid} = NodeProcess.start_link(neuron)
+		neuron.pid(pid)
 	end
 
 

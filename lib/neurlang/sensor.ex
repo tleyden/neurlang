@@ -28,7 +28,8 @@ defrecord Neurlang.Sensor, id: nil, pid: nil, sync_function: nil, outbound_conne
 	@spec start_node(Sensor.options) :: Sensor.t
 	def start_node(keywords) do
 		sensor = Sensor.new(keywords)
-		NodeProcess.start_link(sensor)
+		{:ok, pid} = NodeProcess.start_link(sensor)
+		sensor.pid(pid)
 	end
 
 end

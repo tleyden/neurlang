@@ -12,6 +12,7 @@ defmodule Neurlang.NodeProcess do
   """
 	use GenServer.Behaviour
 	use Neurlang
+  alias Neurlang, as: N
 
 	## API
 
@@ -20,9 +21,9 @@ defmodule Neurlang.NodeProcess do
 
   * `node` - a Neuron, Actuator, or Sensor
   """
+	@spec start_link(N.neuro_node) :: {:ok | :error, pid}
 	def start_link(node) do
-		{:ok, pid} = :gen_server.start_link(__MODULE__, node, [])	
-		node.pid(pid)
+		:gen_server.start_link(__MODULE__, node, [])	
 	end
 
 	@doc """

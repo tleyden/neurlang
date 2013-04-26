@@ -32,7 +32,8 @@ defrecord Neurlang.Actuator, id: nil, pid: nil, inbound_connections: [], outboun
 	@spec start_node(Actuator.options) :: Actuator.t
 	def start_node(keywords) do
 		actuator = Actuator.new(keywords)
-		NodeProcess.start_link(actuator)
+		{:ok, pid} = NodeProcess.start_link(actuator)
+		actuator.pid(pid)
 	end
 
 end
