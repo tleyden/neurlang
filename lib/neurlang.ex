@@ -7,9 +7,6 @@ defmodule Neurlang do
       alias Neurlang.Neuron, as: Neuron
       alias Neurlang.Sensor, as: Sensor
       alias Neurlang.Actuator, as: Actuator
-      alias Neurlang.NodeProcess, as: NeuronProcess
-      alias Neurlang.NodeProcess, as: SensorProcess
-      alias Neurlang.NodeProcess, as: ActuatorProcess
       alias Neurlang.NodeProcess, as: NodeProcess
       alias Neurlang.MathUtil, as: MathUtil
     end

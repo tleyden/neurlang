@@ -19,10 +19,10 @@ defmodule NeuralNetworkTest do
 		{ _neuron, actuator } = connect( from: neuron, to: actuator )
 
 		# tap into actuator for testing purposes
-		_actuator = ActuatorProcess.add_outbound_connection( actuator, MockNode.new( pid: self() ) )
+		_actuator = NodeProcess.add_outbound_connection( actuator, MockNode.new( pid: self() ) )
 
 		# feed intput into sensor
-		SensorProcess.sync(sensor)
+		NodeProcess.sync(sensor)
 
 		# verify actuator output
 		assert actuator_next_output() == 110
@@ -49,7 +49,7 @@ defmodule NeuralNetworkTest do
 		{ _neuron_a3_1, actuator } = connect( from: neuron_a3_1, to: actuator ) 
 
 		# tap into actuator for testing purposes
-		_actuator = ActuatorProcess.add_outbound_connection( actuator, MockNode.new( pid: self() ) )
+		_actuator = NodeProcess.add_outbound_connection( actuator, MockNode.new( pid: self() ) )
 
 		# x1 = 0, x2 = 0 -> 1
 		sync_sensors( sensor_x1, sensor_x2 )
@@ -86,8 +86,8 @@ defmodule NeuralNetworkTest do
 	end
 
 	def sync_sensors(sensor_x1, sensor_x2) do
-		SensorProcess.sync(sensor_x1)
-		SensorProcess.sync(sensor_x2)
+		NodeProcess.sync(sensor_x1)
+		NodeProcess.sync(sensor_x2)
 	end
 
 	def identity(x) do
