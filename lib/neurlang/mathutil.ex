@@ -5,14 +5,14 @@ defmodule Neurlang.MathUtil do
 	@doc """
   Compute the dot product of the given vectors
   """
-	@spec dot_product( [number], [number] ) :: number
-	def dot_product( inputs, weights ) do
-		dot_product( inputs, weights, 0 )
+	@spec dot_product([number], [number]) :: number
+	def dot_product(inputs, weights) do
+		dot_product(inputs, weights, 0)
 	end
 
-	@spec sigmoid( number ) :: float
-	def sigmoid( x ) do
-		1 / ( 1 + :math.exp( -x ) )
+	@spec sigmoid(number) :: float
+	def sigmoid(x) do
+		1 / (1 + :math.exp( -x ))
 	end
 
 	@doc """
@@ -24,8 +24,8 @@ defmodule Neurlang.MathUtil do
 		assert f.() == 1
 
   """
-	@spec create_generator( list ) :: ( fun() -> term ) 
-	def create_generator( values ) do
+	@spec create_generator(list) :: (fun() -> term) 
+	def create_generator(values) do
 		generator_pid = Process.spawn __MODULE__, :generator, [values]
 		fn() ->
 				msg = self()
@@ -40,25 +40,25 @@ defmodule Neurlang.MathUtil do
 
 	## Private
 
-	@spec dot_product( [number], [number], number ) :: number
-	defp dot_product( [i|inputs], [w|weights], acc ) do
-		dot_product( inputs, weights, i*w + acc )
+	@spec dot_product([number], [number], number) :: number
+	defp dot_product([i|inputs], [w|weights], acc) do
+		dot_product(inputs, weights, i*w + acc)
 	end
 
-	defp dot_product( [], [], acc ) do
+	defp dot_product([], [], acc) do
 		acc
 	end
 
-	@spec generator( list ) :: term
-	def generator( output_vals ) do
+	@spec generator(list) :: term
+	def generator(output_vals) do
 		receive do
 			from_pid when length( output_vals ) > 0 ->
 				[val|remaining_vals] = output_vals
 				from_pid <- val
-				generator( remaining_vals )
+				generator(remaining_vals)
 			from_pid ->
 				from_pid <- nil
-				generator( [] )
+				generator([])
 		end
 	end
 

@@ -48,15 +48,15 @@ defimpl Accumulator, for: Neuron do
 	alias Neurlang.MathUtil, as: MathUtil
 	import MathUtil, only: [dot_product: 2]
 
-	def create_barrier( node ) do
-		node.barrier( HashDict.new )
+	def create_barrier(node) do
+		node.barrier(HashDict.new)
 	end
 
-	def update_barrier_state( Neuron[] = node, {from_pid, input_value} ) do
-		node.barrier( Dict.put(node.barrier(), from_pid, input_value) )
+	def update_barrier_state(Neuron[] = node, {from_pid, input_value}) do
+		node.barrier(Dict.put(node.barrier(), from_pid, input_value))
 	end
 
-	def is_barrier_satisfied?( Neuron[inbound_connections: inbound_connections, barrier: barrier] ) do
+	def is_barrier_satisfied?(Neuron[inbound_connections: inbound_connections, barrier: barrier]) do
 		inbound_connections_accounted = Enum.filter(inbound_connections, fn({pid, _weights}) -> 
 																																				 HashDict.has_key?(barrier, pid) 
 																																		 end)
@@ -75,14 +75,14 @@ defimpl Accumulator, for: Neuron do
 		[ scalar_output ]
 	end
 
-	def propagate_output( node, output ) do
+	def propagate_output(node, output) do
 		message = { node.pid(), :forward, output }
 		Enum.each node.outbound_connections(), fn(node) -> 
 																								node <- message 
 																						end
 	end
 
-	def sync( node ) do
+	def sync(node) do
 		if node, do: throw "Neurons do not have sync functionality yet"
 		node
 	end
@@ -118,22 +118,22 @@ end
 
 defimpl ConnectedNode, for: Neuron do
 
-	def pid( node ) do
+	def pid(node) do
 		node.pid()
 	end
 
-	def add_inbound_connection( node, from_node, weights ) do
-		inbound_connection = { from_node.pid(), weights }
-		node.inbound_connections( [ inbound_connection | node.inbound_connections() ] )
+	def add_inbound_connection(node, from_node, weights) do
+		inbound_connection = {from_node.pid(), weights}
+		node.inbound_connections([inbound_connection | node.inbound_connections()])
 	end
 
-	def add_inbound_connection( node, _from_node ) do 
+	def add_inbound_connection(node, _from_node) do 
 		if node, do: throw "Neuron inbound connections must have weights associated with them"
 		node
 	end
 	
-	def add_outbound_connection( node, to_node ) do
-		node.outbound_connections( [ to_node.pid() | node.outbound_connections() ] )
+	def add_outbound_connection(node, to_node) do
+		node.outbound_connections([to_node.pid() | node.outbound_connections()])
 	end
 
 end

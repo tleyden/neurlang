@@ -35,33 +35,33 @@ end
 
 defimpl Accumulator, for: Sensor do
 
-	def create_barrier( node ) do 
+	def create_barrier(node) do 
 		node
 	end
 
-	def update_barrier_state( node, {_from_pid, _input_value} ) do
+	def update_barrier_state(node, {_from_pid, _input_value}) do
 		if node, do: throw "Sensors are not expected to receive inputs.  Use sync_function instead"
 		node
 	end
 
-	def is_barrier_satisfied?( node ) do
+	def is_barrier_satisfied?(node) do
 		if node, do: throw "Sensors are not expected to receive inputs.  Use sync_function instead"
 		node
 	end
 
-	def compute_output( node ) do
+	def compute_output(node) do
 		if node, do: throw "Sensors are not expected to receive inputs.  Use sync_function instead"
 		node
 	end
 
-	def propagate_output( node, output ) do
-		message = { node.pid(), :forward, output }
+	def propagate_output(node, output) do
+		message = {node.pid(), :forward, output}
 		Enum.each node.outbound_connections(), fn(node) -> 
 																								node <- message 
 																						end
 	end
 
-	def sync( node ) do
+	def sync(node) do
 		f = node.sync_function()
 		f.( )
 	end
@@ -70,23 +70,23 @@ end
 
 defimpl ConnectedNode, for: Sensor do
 
-	def pid( node ) do
+	def pid(node) do
 		node.pid()
 	end
 
-	def add_inbound_connection( node, _from_node ) do
+	def add_inbound_connection(node, _from_node) do
 		if node, do: throw "Sensors are not expected to have inbound connections.  Use sync_function instead"
 		node
 	end
 
-	def add_inbound_connection( node, _from_node, _weights ) do
+	def add_inbound_connection(node, _from_node, _weights) do
 		if node, do: throw "Sensor inbound connections do not have weights associated with them"
 		node
 	end
 
 	
-	def add_outbound_connection( node, to_node ) do
-		node.outbound_connections( [ to_node.pid() | node.outbound_connections() ] )
+	def add_outbound_connection(node, to_node) do
+		node.outbound_connections([to_node.pid() | node.outbound_connections()])
 	end
 
 end

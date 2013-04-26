@@ -5,11 +5,12 @@ defmodule Neurlang do
 			alias Neurlang.ConnectedNode, as: ConnectedNode
 			alias Neurlang.Accumulator, as: Accumulator
       alias Neurlang.Neuron, as: Neuron
-      alias Neurlang.NodeProcess, as: NeuronProcess
       alias Neurlang.Sensor, as: Sensor
-      alias Neurlang.NodeProcess, as: SensorProcess
       alias Neurlang.Actuator, as: Actuator
+      alias Neurlang.NodeProcess, as: NeuronProcess
+      alias Neurlang.NodeProcess, as: SensorProcess
       alias Neurlang.NodeProcess, as: ActuatorProcess
+      alias Neurlang.NodeProcess, as: NodeProcess
       alias Neurlang.MathUtil, as: MathUtil
     end
   end

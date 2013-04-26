@@ -39,8 +39,8 @@ end
 
 defimpl Accumulator, for: Actuator do
 
-	def create_barrier( node ) do
-		node.barrier( HashDict.new )
+	def create_barrier(node) do
+		node.barrier(HashDict.new)
 	end
 
 	def update_barrier_state(node, {from_pid, input_value}) do
@@ -55,21 +55,21 @@ defimpl Accumulator, for: Actuator do
 	end
 
 
-	def compute_output( node ) do
+	def compute_output(node) do
 			barrier = node.barrier()
 			inbound_connections = node.inbound_connections()
 			received_inputs = lc input_node_pid inlist inbound_connections, do: barrier[input_node_pid]
 			List.flatten( received_inputs ) 
 	end
 
-	def propagate_output( node, output ) do
+	def propagate_output(node, output) do
 		message = { node.pid(), :forward, output }
 		Enum.each node.outbound_connections(), fn(node) -> 
 																								node <- message 
 																						end
 	end
 
-	def sync( node ) do
+	def sync(node) do
 		if node, do: throw "Actuators do not have sync functionality yet"
 		node
 	end
@@ -80,22 +80,22 @@ end
 
 defimpl ConnectedNode, for: Actuator do
 
-	def pid( node ) do
+	def pid(node) do
 		node.pid()
 	end
 
-	def add_inbound_connection( node, _from_node, _weights ) do
+	def add_inbound_connection(node, _from_node, _weights) do
 		if node, do: throw "Actuator inbound connections do not have weights associated with them"
 		node
 	end
 
-	def add_inbound_connection( node, from_node ) do 
+	def add_inbound_connection(node, from_node) do 
 		inbound_connection = from_node.pid()  
-		node.inbound_connections( [ inbound_connection | node.inbound_connections() ] )
+		node.inbound_connections([inbound_connection | node.inbound_connections()])
 	end
 	
-	def add_outbound_connection( node, to_node ) do
-		node.outbound_connections( [ to_node.pid() | node.outbound_connections() ] )
+	def add_outbound_connection(node, to_node) do
+		node.outbound_connections([to_node.pid() | node.outbound_connections()])
 	end
 
 end
