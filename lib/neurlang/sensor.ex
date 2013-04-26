@@ -43,18 +43,18 @@ defimpl Accumulator, for: Sensor do
 	end
 
 	def update_barrier_state(node, {_from_pid, _input_value}) do
-		if node, do: throw "Sensors are not expected to receive inputs.  Use sync_function instead"
+		# Sensors are not expected to receive inputs, so this is ignored.  Use sync_function instead
 		node
 	end
 
-	def is_barrier_satisfied?(node) do
-		if node, do: throw "Sensors are not expected to receive inputs.  Use sync_function instead"
-		node
+	def is_barrier_satisfied?(_node) do
+		# Sensors are not expected to receive inputs, so this is ignored.  Use sync_function instead
+		true
 	end
 
-	def compute_output(node) do
-		if node, do: throw "Sensors are not expected to receive inputs.  Use sync_function instead"
-		node
+	def compute_output(_node) do
+		# Sensors are not expected to receive inputs, so this is ignored.  Use sync_function instead
+		[]
 	end
 
 	def propagate_output(node, output) do
@@ -78,12 +78,12 @@ defimpl ConnectedNode, for: Sensor do
 	end
 
 	def add_inbound_connection(node, _from_node) do
-		if node, do: throw "Sensors are not expected to have inbound connections.  Use sync_function instead"
+		# Sensors are not expected to have inbound connections, so this is ignored.  Use sync_function instead
 		node
 	end
 
 	def add_inbound_connection(node, _from_node, _weights) do
-		if node, do: throw "Sensor inbound connections do not have weights associated with them"
+		# Sensors are not expected to have inbound connections, so this is ignored.  Use sync_function instead
 		node
 	end
 

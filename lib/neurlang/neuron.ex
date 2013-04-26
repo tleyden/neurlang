@@ -85,7 +85,6 @@ defimpl Accumulator, for: Neuron do
 	end
 
 	def sync(node) do
-		if node, do: throw "Neurons do not have sync functionality yet"
 		node
 	end
 

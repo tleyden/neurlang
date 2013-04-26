@@ -12,7 +12,6 @@ defmodule Neurlang do
     end
   end
 
-  @type neuro_node :: Actuator.t | Neuron.t | Sensor.t
+  @type neurlang_node :: Actuator.t | Neuron.t | Sensor.t
   @type barrier_entry :: {pid, list(number)}
-
 end
