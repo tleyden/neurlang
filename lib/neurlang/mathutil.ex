@@ -10,6 +10,9 @@ defmodule Neurlang.MathUtil do
 		dot_product(inputs, weights, 0)
 	end
 
+	@doc """
+	Sigmoid function
+	"""
 	@spec sigmoid(number) :: float
 	def sigmoid(x) do
 		1 / (1 + :math.exp( -x ))
@@ -37,7 +40,6 @@ defmodule Neurlang.MathUtil do
 		end
 	end
 
-
 	## Private
 
 	@spec dot_product([number], [number], number) :: number
@@ -61,7 +63,5 @@ defmodule Neurlang.MathUtil do
 				generator([])
 		end
 	end
-
-
 
 end
