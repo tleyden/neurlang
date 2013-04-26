@@ -86,7 +86,7 @@ defmodule Neurlang.NodeProcess do
 	end
 
 	@doc false
-  @spec handle_info({pid, :forward, list(number)}, N.neurlang_node) :: {:noreply, N.neurlang_node}
+  @spec handle_info(N.node_message, N.neurlang_node) :: {:noreply, N.neurlang_node}
 	def handle_info({from_pid, :forward, input_value}, node) do
 		node = handle_input({from_pid, input_value}, node)
 		{:noreply, node}
