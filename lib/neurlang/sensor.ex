@@ -25,9 +25,11 @@ defrecord Neurlang.Sensor, id: nil, pid: nil, sync_function: nil, outbound_conne
 	record_type sync_function: (fun(any) -> [number])
 	record_type outbound_connections: [pid]
 
-	@spec start_node(Sensor.options) :: Sensor.t
-	def start_node(keywords) do
-		sensor = Sensor.new(keywords)
+	@spec start_node(Sensor.options | Sensor.t) :: Sensor.t
+	def start_node(keywords) when is_list(keywords) do
+		start_node(new(keywords))
+	end
+	def start_node(sensor) do
 		{:ok, pid} = NodeProcess.start_link(sensor)
 		sensor.pid(pid)
 	end

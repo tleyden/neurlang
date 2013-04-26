@@ -35,13 +35,14 @@ defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: ni
 	record_type outbound_connections: [pid]
 	record_type barrier: Dict
 
-	@spec start_node(Neuron.options) :: Neuron.t
-	def start_node(keywords) do
-		neuron = Neuron.new(keywords)
+	@spec start_node(Neuron.options | Neuron.t) :: Neuron.t
+	def start_node(keywords) when is_list(keywords) do
+		start_node(new(keywords))
+	end
+	def start_node(neuron) do
 		{:ok, pid} = NodeProcess.start_link(neuron)
 		neuron.pid(pid)
 	end
-
 
 end
 
@@ -113,7 +114,6 @@ defimpl Accumulator, for: Neuron do
 		end
 
 	end
-
 
 end
 

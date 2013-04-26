@@ -29,9 +29,11 @@ defrecord Neurlang.Actuator, id: nil, pid: nil, inbound_connections: [], outboun
 	record_type outbound_connections: [pid]
 	record_type barrier: Dict
 
-	@spec start_node(Actuator.options) :: Actuator.t
-	def start_node(keywords) do
-		actuator = Actuator.new(keywords)
+	@spec start_node(Actuator.options | Actuator.t) :: Actuator.t
+	def start_node(keywords) when is_list(keywords) do
+		start_node(new(keywords))
+	end
+	def start_node(actuator) do
 		{:ok, pid} = NodeProcess.start_link(actuator)
 		actuator.pid(pid)
 	end
