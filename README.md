@@ -17,23 +17,22 @@ ___Status: Neurlang is still in the process of being built, and is therefore is 
 # Using Neurlang
 
     # Create nodes
-    neuron = neuron( id: make_ref(), bias: 10, activation_function: function(identity/1) )
-    sensor = sensor( id: make_ref(), sync_function: fake_sensor_data( [ [1, 1, 1, 1, 1] ] ) )
-    actuator = actuator( id: make_ref() )
+    neuron = Neuron.start_node( id: make_ref(), bias: 10, activation_function: function(identity/1) )
+    sensor = Sensor.start_node( id: make_ref(), sync_function: fake_sensor_data( [ [1, 1, 1, 1, 1] ] ) )
+    actuator = Actuator.start_node( id: make_ref() )
 
     # Wire up network
     { sensor, _neuron } = connect( from: sensor, to: neuron, weights: [20, 20, 20, 20, 20] )
     { _neuron, actuator } = connect( from: neuron, to: actuator )
 
     # tap into actuator for testing purposes
-    _actuator = ActuatorProcess.add_outbound_connection( actuator, MockNode.new( pid: self() ) )
+    _actuator = NodeProcess.add_outbound_connection( actuator, MockNode.new( pid: self() ) )
 
     # feed intput into sensor
-    SensorProcess.sync(sensor)
+    NodeProcess.sync(sensor)
 
     # verify actuator output
     assert actuator_next_output() == 110
-
 
 # Architecture
 
