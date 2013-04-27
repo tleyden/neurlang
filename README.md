@@ -22,11 +22,11 @@ ___Status: Neurlang is still in the process of being built, and is therefore is 
     actuator = Actuator.start_node(id: make_ref())
 
     # Wire up network
-    {sensor, _neuron} = connect(from: sensor, to: neuron, weights: [20, 20, 20, 20, 20])
-    {_neuron, actuator} = connect(from: neuron, to: actuator)
+    connect(from: sensor, to: neuron, weights: [20, 20, 20, 20, 20])
+    connect(from: neuron, to: actuator)
 
     # tap into actuator for testing purposes
-    _actuator = NodeProcess.add_outbound_connection(actuator, MockNode.new(pid: self()))
+    NodeProcess.add_outbound_connection(actuator, self())
 
     # feed intput into sensor
     NodeProcess.sync(sensor)

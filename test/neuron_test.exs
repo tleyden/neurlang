@@ -13,16 +13,13 @@ defmodule NeuronTest do
 		input_vector2 = [20, 20]
 		weight_vector2 = [2, 2]
 
-		sensor1 = Sensor.new(pid: :sensor1)
-		sensor2 = Sensor.new(pid: :sensor2)
-
 		neuron = Neuron.new(bias: bias, activation_function: activation_function)
-		neuron = ConnectedNode.add_inbound_connection( neuron, sensor1, weight_vector1 )
-		neuron = ConnectedNode.add_inbound_connection( neuron, sensor2, weight_vector2 )
+		neuron = ConnectedNode.add_inbound_connection( neuron, :sensor1_pid, weight_vector1 )
+		neuron = ConnectedNode.add_inbound_connection( neuron, :sensor2_pid, weight_vector2 )
 
 		barrier = HashDict.new
-		barrier = Dict.put( barrier, :sensor1, input_vector1)
-		barrier = Dict.put( barrier, :sensor2, input_vector2)
+		barrier = Dict.put( barrier, :sensor1_pid, input_vector1)
+		barrier = Dict.put( barrier, :sensor2_pid, input_vector2)
 	
 		neuron = neuron.barrier( barrier )
 
@@ -34,24 +31,22 @@ defmodule NeuronTest do
 
   test "connected node: add inbound connection" do
 		
-		sensor = Sensor.new(pid: :fakepid)
 		neuron = Neuron.new()
-		neuron = ConnectedNode.add_inbound_connection( neuron, sensor, [] )
+		neuron = ConnectedNode.add_inbound_connection( neuron, :sensor_pid, [] )
 		neuron_inbound = neuron.inbound_connections()
 		{ node_pid, weights } = Enum.at! neuron_inbound, 0
-		assert node_pid == :fakepid
+		assert node_pid == :sensor_pid
 		assert weights == []
 
 	end
 
   test "connected node: add oubound connection" do
 		
-		actuator = Actuator.new(pid: :actuatorpid)
-		neuron = Neuron.new(pid: :neuronpid)
-		neuron = ConnectedNode.add_outbound_connection( neuron, actuator )
+		neuron = Neuron.new()
+		neuron = ConnectedNode.add_outbound_connection( neuron, :actuator_pid )
 		neuron_outbound = neuron.outbound_connections()
 		node_pid = Enum.at! neuron_outbound, 0
-		assert node_pid == :actuatorpid
+		assert node_pid == :actuator_pid
 
 	end
 

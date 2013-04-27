@@ -3,14 +3,12 @@ alias Neurlang.ConnectedNode, as: ConnectedNode
 alias Neurlang.Accumulator, as: Accumulator
 alias Neurlang.Sensor, as: Sensor
 
-defrecord Neurlang.Sensor, id: nil, pid: nil, sync_function: nil, outbound_connections: []  do
+defrecord Neurlang.Sensor, id: nil, sync_function: nil, outbound_connections: []  do
 
   @moduledoc """
   Metadata for the Neuron node:
 
   * `id` - a unique id gotten from calling make_ref()
-
-	* `pid` - the process id
 
 	* `sync_function` - this function is called when the sensor receives a sync message.  
                       the return value is expected to be an input vector, and is forwarded
@@ -21,17 +19,16 @@ defrecord Neurlang.Sensor, id: nil, pid: nil, sync_function: nil, outbound_conne
 	use Neurlang
 
 	record_type id: reference
-	record_type pid: pid
 	record_type sync_function: (fun(any) -> [number])
 	record_type outbound_connections: [pid]
 
-	@spec start_node(Sensor.options | Sensor.t) :: Sensor.t
+	@spec start_node(Sensor.options | Sensor.t) :: pid
 	def start_node(keywords) when is_list(keywords) do
 		start_node(new(keywords))
 	end
 	def start_node(sensor) do
 		{:ok, pid} = NodeProcess.start_link(sensor)
-		sensor.pid(pid)
+		pid
 	end
 
 end
@@ -58,9 +55,9 @@ defimpl Accumulator, for: Sensor do
 	end
 
 	def propagate_output(node, output) do
-		message = {node.pid(), :forward, output}
-		Enum.each node.outbound_connections(), fn(node) -> 
-																								node <- message 
+		message = {self(), :forward, output}
+		Enum.each node.outbound_connections(), fn(node_pid) -> 
+																								node_pid <- message 
 																						end
 	end
 
@@ -72,24 +69,21 @@ defimpl Accumulator, for: Sensor do
 end
 
 defimpl ConnectedNode, for: Sensor do
+	import Neurlang, only: [validate_pid: 1]
 
-	def pid(node) do
-		node.pid()
-	end
-
-	def add_inbound_connection(node, _from_node) do
+	def add_inbound_connection(node, _from_node_pid) do
 		# Sensors are not expected to have inbound connections, so this is ignored.  Use sync_function instead
 		node
 	end
 
-	def add_inbound_connection(node, _from_node, _weights) do
+	def add_inbound_connection(node, _from_node_pid, _weights) do
 		# Sensors are not expected to have inbound connections, so this is ignored.  Use sync_function instead
 		node
 	end
-
 	
-	def add_outbound_connection(node, to_node) do
-		node.outbound_connections([to_node.pid() | node.outbound_connections()])
+	def add_outbound_connection(node, to_node_pid) do
+		validate_pid(to_node_pid)
+		node.outbound_connections([to_node_pid | node.outbound_connections()])
 	end
 
 end

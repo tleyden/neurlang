@@ -29,34 +29,34 @@ defmodule Neurlang.NodeProcess do
 	@doc """
 	Add an inbound connection to this neuron from node (sensor | neuron)
 	"""
-	@spec add_inbound_connection(N.neurlang_node, N.neurlang_node, list(number)) :: N.neurlang_node
-	def add_inbound_connection(node, from_node, weights) do
-		message = {:add_inbound_connection, {from_node, weights}}
-		:gen_server.call(ConnectedNode.pid(node), message)
+	@spec add_inbound_connection(pid, pid, list(number)) :: N.neurlang_node
+	def add_inbound_connection(node_pid, from_node_pid, weights) do
+		message = {:add_inbound_connection, {from_node_pid, weights}}
+		:gen_server.call(node_pid, message)
 	end
 
 	@doc """
 	Add an inbound connection to this actuator from node (sensor | neuron)
 	"""
-  @spec add_inbound_connection(N.neurlang_node, N.neurlang_node) :: N.neurlang_node
-	def add_inbound_connection(node, from_node) do
-		:gen_server.call(ConnectedNode.pid(node), {:add_inbound_connection, from_node})
+  @spec add_inbound_connection(pid, pid) :: N.neurlang_node
+	def add_inbound_connection(node_pid, from_node_pid) do
+		:gen_server.call(node_pid, {:add_inbound_connection, from_node_pid})
 	end
 
 	@doc """
 	Add an outbound connection from this neuron to given node
 	"""
-  @spec add_outbound_connection(N.neurlang_node, N.neurlang_node) :: N.neurlang_node
-	def add_outbound_connection(node, to_node) do
-		:gen_server.call(ConnectedNode.pid( node ), {:add_outbound_connection, to_node})
+  @spec add_outbound_connection(pid, pid) :: N.neurlang_node
+	def add_outbound_connection(node_pid, to_node_pid) do
+		:gen_server.call(node_pid, {:add_outbound_connection, to_node_pid})
 	end
 
 	@doc """
   Cause this sensor to sense the environment and send outputs.  
   """
-  @spec sync(N.neurlang_node) :: N.neurlang_node
-	def sync(node) do
-		:gen_server.cast(ConnectedNode.pid( node ), :sync)
+  @spec sync(pid) :: N.neurlang_node
+	def sync(node_pid) do
+		:gen_server.cast(node_pid, :sync)
 	end
 
 	## Private
@@ -81,7 +81,6 @@ defmodule Neurlang.NodeProcess do
   @spec init(N.neurlang_node) :: {:ok, N.neurlang_node}
 	def init(node) do
 		node = Accumulator.create_barrier(node)
-		node = node.pid(self()) 
 		{:ok, node}
 	end
 
@@ -108,20 +107,20 @@ defmodule Neurlang.NodeProcess do
 
 	@doc false
 	@spec handle_call(N.handle_call_msg, {pid,any}, N.neurlang_node) :: {:reply, N.neurlang_node, N.neurlang_node}
-	def handle_call({:add_inbound_connection, {from_node, weights}}, _from_pid, node) do
-		node = ConnectedNode.add_inbound_connection(node, from_node, weights)
+	def handle_call({:add_inbound_connection, {from_node_pid, weights}}, _from_pid, node) do
+		node = ConnectedNode.add_inbound_connection(node, from_node_pid, weights)
 		{:reply, node, node}
 	end
 
 	@doc false
-	def handle_call({:add_inbound_connection, from_node}, _from_pid, node) do
-		node = ConnectedNode.add_inbound_connection(node, from_node)
+	def handle_call({:add_inbound_connection, from_node_pid}, _from_pid, node) do
+		node = ConnectedNode.add_inbound_connection(node, from_node_pid)
 		{:reply, node, node}
 	end
 
 	@doc false
-	def handle_call({:add_outbound_connection, to_node}, _from_pid, node) do
-		node = ConnectedNode.add_outbound_connection(node, to_node)
+	def handle_call({:add_outbound_connection, to_node_pid}, _from_pid, node) do
+		node = ConnectedNode.add_outbound_connection(node, to_node_pid)
 		{:reply, node, node}
 	end
 

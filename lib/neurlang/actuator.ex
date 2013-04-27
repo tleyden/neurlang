@@ -3,15 +3,13 @@ alias Neurlang.ConnectedNode, as: ConnectedNode
 alias Neurlang.Accumulator, as: Accumulator
 alias Neurlang.Actuator, as: Actuator
 
-defrecord Neurlang.Actuator, id: nil, pid: nil, inbound_connections: [], outbound_connections: [], 
+defrecord Neurlang.Actuator, id: nil, inbound_connections: [], outbound_connections: [], 
 										         barrier: HashDict.new do
  
   @moduledoc """
   Metadata for the Actuator node:
 
   * `id` - a unique id gotten from calling make_ref()
-
-	* `pid` - the process id
 
 	* `inbound_connections` - a list of pid's of neurons nodes this actuator should expect to receive input from
 
@@ -24,18 +22,17 @@ defrecord Neurlang.Actuator, id: nil, pid: nil, inbound_connections: [], outboun
 	use Neurlang
 
 	record_type id: reference
-	record_type pid: pid
 	record_type inbound_connections: [pid]
 	record_type outbound_connections: [pid]
 	record_type barrier: Dict
 
-	@spec start_node(Actuator.options | Actuator.t) :: Actuator.t
+	@spec start_node(Actuator.options | Actuator.t) :: pid
 	def start_node(keywords) when is_list(keywords) do
 		start_node(new(keywords))
 	end
 	def start_node(actuator) do
 		{:ok, pid} = NodeProcess.start_link(actuator)
-		actuator.pid(pid)
+		pid
 	end
 
 end
@@ -66,9 +63,9 @@ defimpl Accumulator, for: Actuator do
 	end
 
 	def propagate_output(node, output) do
-		message = { node.pid(), :forward, output }
-		Enum.each node.outbound_connections(), fn(node) -> 
-																								node <- message 
+		message = { self(), :forward, output }
+		Enum.each node.outbound_connections(), fn(node_pid) -> 
+																								node_pid <- message 
 																						end
 	end
 
@@ -77,28 +74,27 @@ defimpl Accumulator, for: Actuator do
 		node
 	end
 
-
 end
 
 
 defimpl ConnectedNode, for: Actuator do
 
-	def pid(node) do
-		node.pid()
-	end
+	import Neurlang, only: [validate_pid: 1]
 
-	def add_inbound_connection(node, _from_node, _weights) do
+	def add_inbound_connection(node, _from_node_pid, _weights) do
 		if node, do: throw "Actuator inbound connections do not have weights associated with them"
 		node
 	end
 
-	def add_inbound_connection(node, from_node) do 
-		inbound_connection = from_node.pid()  
+	def add_inbound_connection(node, from_node_pid) do 
+		validate_pid(from_node_pid)
+		inbound_connection = from_node_pid  
 		node.inbound_connections([inbound_connection | node.inbound_connections()])
 	end
 	
-	def add_outbound_connection(node, to_node) do
-		node.outbound_connections([to_node.pid() | node.outbound_connections()])
+	def add_outbound_connection(node, to_node_pid) do
+		validate_pid(to_node_pid)
+		node.outbound_connections([to_node_pid | node.outbound_connections()])
 	end
 
 end

@@ -10,10 +10,9 @@ defmodule ActuatorTest do
 
   test "barrier satisfied" do
 		actuator = Actuator.new(pid: :actuatorpid)
-		neuron = Neuron.new(pid: :neuronpid)
-		actuator = ConnectedNode.add_inbound_connection( actuator, neuron )
+		actuator = ConnectedNode.add_inbound_connection( actuator, :neuron_pid )
 		barrier = HashDict.new()
-		barrier = Dict.put( barrier, :neuronpid, :fake_input)
+		barrier = Dict.put( barrier, :neuron_pid, :fake_input)
 		actuator = actuator.barrier( barrier )
 		assert Accumulator.is_barrier_satisfied?(actuator) == true
 	end

@@ -15,11 +15,11 @@ defmodule NeuralNetworkTest do
 		actuator = Actuator.start_node(id: make_ref())
 
 		# Wire up network
-		{sensor, _neuron} = connect(from: sensor, to: neuron, weights: [20, 20, 20, 20, 20])
-		{_neuron, actuator} = connect(from: neuron, to: actuator)
+		connect(from: sensor, to: neuron, weights: [20, 20, 20, 20, 20])
+		connect(from: neuron, to: actuator)
 
 		# tap into actuator for testing purposes
-		_actuator = NodeProcess.add_outbound_connection(actuator, MockNode.new(pid: self()))
+		NodeProcess.add_outbound_connection(actuator, self())
 
 		# feed intput into sensor
 		NodeProcess.sync(sensor)
@@ -33,6 +33,7 @@ defmodule NeuralNetworkTest do
 
 		# Create nodes
 		sensor_x1 = Sensor.start_node(id: make_ref(), sync_function: fake_sensor_data( [[0], [0], [1], [1]]))
+
 		sensor_x2 = Sensor.start_node(id: make_ref(), sync_function: fake_sensor_data( [[0], [1], [0], [1]]))
 		neuron_a2_1 = Neuron.start_node(id: make_ref(), bias: -30, activation_function: function(sigmoid/1))
 		neuron_a2_2 = Neuron.start_node(id: make_ref(), bias: 10, activation_function: function(sigmoid/1))
@@ -40,16 +41,16 @@ defmodule NeuralNetworkTest do
 		actuator = Actuator.start_node(id: make_ref())
 
 		# Wire up network
-		{sensor_x1, _neuron_a2_1} = connect(from: sensor_x1, to: neuron_a2_1, weights: [20])
-		{sensor_x1, _neuron_a2_2} = connect(from: sensor_x1, to: neuron_a2_2, weights: [-20])
-		{sensor_x2, _neuron_a2_1} = connect(from: sensor_x2, to: neuron_a2_1, weights: [20])
-		{sensor_x2, _neuron_a2_2} = connect(from: sensor_x2, to: neuron_a2_2, weights: [-20])
-		{_neuron_a2_1, _neuron_a3_1} = connect(from: neuron_a2_1, to: neuron_a3_1, weights: [20])
-		{_neuron_a2_2, _neuron_a3_1} = connect(from: neuron_a2_2, to: neuron_a3_1, weights: [20])
-		{_neuron_a3_1, actuator} = connect(from: neuron_a3_1, to: actuator) 
+		connect(from: sensor_x1, to: neuron_a2_1, weights: [20])
+		connect(from: sensor_x1, to: neuron_a2_2, weights: [-20])
+		connect(from: sensor_x2, to: neuron_a2_1, weights: [20])
+		connect(from: sensor_x2, to: neuron_a2_2, weights: [-20])
+		connect(from: neuron_a2_1, to: neuron_a3_1, weights: [20])
+		connect(from: neuron_a2_2, to: neuron_a3_1, weights: [20])
+		connect(from: neuron_a3_1, to: actuator) 
 
 		# tap into actuator for testing purposes
-		_actuator = NodeProcess.add_outbound_connection(actuator, MockNode.new( pid: self()))
+		NodeProcess.add_outbound_connection(actuator, self())
 
 		# x1 = 0, x2 = 0 -> 1
 		sync_sensors(sensor_x1, sensor_x2)
@@ -100,8 +101,4 @@ defmodule NeuralNetworkTest do
 
 end
 
-defrecord MockNode, pid: nil do
-	@defmodule """
-  Useful to allow neurons and actuators send messages to the test process
-  """
-end
+

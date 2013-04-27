@@ -3,15 +3,13 @@ alias Neurlang.ConnectedNode, as: ConnectedNode
 alias Neurlang.Accumulator, as: Accumulator
 alias Neurlang.Neuron, as: Neuron
 
-defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: nil, 
+defrecord Neurlang.Neuron, id: nil, activation_function: nil, bias: nil, 
 										       inbound_connections: [], outbound_connections: [], barrier: HashDict.new do
 
   @moduledoc """
   Metadata for the Neuron node:
 
   * `id` - a unique id gotten from calling make_ref()
-
-	* `pid` - the process id
 
   * `activation_function` - a function which will be used to calculate the output, eg, a sigmoid funtion
 
@@ -28,20 +26,19 @@ defrecord Neurlang.Neuron, id: nil, pid: nil, activation_function: nil, bias: ni
 	use Neurlang
 
 	record_type id: reference
-	record_type pid: pid
 	record_type activation_function: (fun(number) -> number)
 	record_type bias: number
 	record_type inbound_connections: [{pid, list}]
 	record_type outbound_connections: [pid]
 	record_type barrier: Dict
 
-	@spec start_node(Neuron.options | Neuron.t) :: Neuron.t
+	@spec start_node(Neuron.options | Neuron.t) :: pid
 	def start_node(keywords) when is_list(keywords) do
 		start_node(new(keywords))
 	end
 	def start_node(neuron) do
 		{:ok, pid} = NodeProcess.start_link(neuron)
-		neuron.pid(pid)
+		pid
 	end
 
 end
@@ -78,9 +75,9 @@ defimpl Accumulator, for: Neuron do
 	end
 
 	def propagate_output(node, output) do
-		message = { node.pid(), :forward, output }
-		Enum.each node.outbound_connections(), fn(node) -> 
-																								node <- message 
+		message = { self(), :forward, output }
+		Enum.each node.outbound_connections(), fn(node_pid) -> 
+																								node_pid <- message 
 																						end
 	end
 
@@ -117,23 +114,22 @@ defimpl Accumulator, for: Neuron do
 end
 
 defimpl ConnectedNode, for: Neuron do
+	import Neurlang, only: [validate_pid: 1]
 
-	def pid(node) do
-		node.pid()
-	end
-
-	def add_inbound_connection(node, from_node, weights) do
-		inbound_connection = {from_node.pid(), weights}
+	def add_inbound_connection(node, from_node_pid, weights) do
+		validate_pid(from_node_pid)
+		inbound_connection = {from_node_pid, weights}
 		node.inbound_connections([inbound_connection | node.inbound_connections()])
 	end
 
-	def add_inbound_connection(node, _from_node) do 
+	def add_inbound_connection(node, _from_node_pid) do 
 		if node, do: throw "Neuron inbound connections must have weights associated with them"
 		node
 	end
 	
-	def add_outbound_connection(node, to_node) do
-		node.outbound_connections([to_node.pid() | node.outbound_connections()])
+	def add_outbound_connection(node, to_node_pid) do
+		validate_pid(to_node_pid)
+		node.outbound_connections([to_node_pid | node.outbound_connections()])
 	end
 
 end
