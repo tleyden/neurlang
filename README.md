@@ -17,9 +17,9 @@ ___Status: Neurlang is still in the process of being built, and is therefore is 
 # Using Neurlang
 
     # Create nodes
-    neuron = Neuron.start_node(id: make_ref(), bias: 10, activation_function: function(identity/1))
-    sensor = Sensor.start_node(id: make_ref(), sync_function: fake_sensor_data([[1, 1, 1, 1, 1]]))
-    actuator = Actuator.start_node(id: make_ref())
+    neuron = Neuron.start_node(bias: 10, activation_function: function(identity/1))
+    sensor = Sensor.start_node(sync_function: fake_sensor_data([[1, 1, 1, 1, 1]]))
+    actuator = Actuator.start_node([])
 
     # Wire up network
     connect(from: sensor, to: neuron, weights: [20, 20, 20, 20, 20])
