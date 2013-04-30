@@ -59,6 +59,14 @@ defmodule Neurlang.NodeProcess do
 		:gen_server.cast(node_pid, :sync)
 	end
 
+	@doc """
+  Return the record that represends the node state of this neural node process
+  """
+  @spec node_state(pid) :: N.neurlang_node
+	def node_state(node_pid) do
+		:gen_server.call(node_pid, :node_state)
+	end
+
 	## Private
   @spec handle_input({pid, list(number)}, N.neurlang_node) :: N.neurlang_node
 	defp handle_input({from_pid, input_value}, node) do
@@ -115,6 +123,12 @@ defmodule Neurlang.NodeProcess do
 	@doc false
 	def handle_call({:add_inbound_connection, from_node_pid}, _from_pid, node) do
 		node = ConnectedNode.add_inbound_connection(node, from_node_pid)
+		{:reply, node, node}
+	end
+
+
+	@doc false
+	def handle_call(:node_state, _from_pid, node) do
 		{:reply, node, node}
 	end
 
