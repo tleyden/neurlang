@@ -3,13 +3,11 @@ alias Neurlang.ConnectedNode, as: ConnectedNode
 alias Neurlang.Accumulator, as: Accumulator
 alias Neurlang.Neuron, as: Neuron
 
-defrecord Neurlang.Neuron, id: nil, activation_function: nil, bias: nil, 
+defrecord Neurlang.Neuron, activation_function: nil, bias: nil, 
 										       inbound_connections: [], outbound_connections: [], barrier: HashDict.new do
 
   @moduledoc """
   Metadata for the Neuron node:
-
-  * `id` - a unique id gotten from calling make_ref()
 
   * `activation_function` - a function which will be used to calculate the output, eg, a sigmoid funtion
 
@@ -25,7 +23,6 @@ defrecord Neurlang.Neuron, id: nil, activation_function: nil, bias: nil,
 
 	use Neurlang
 
-	record_type id: reference
 	record_type activation_function: (fun(number) -> number)
 	record_type bias: number
 	record_type inbound_connections: [{pid, list}]

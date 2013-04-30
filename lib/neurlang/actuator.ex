@@ -3,13 +3,11 @@ alias Neurlang.ConnectedNode, as: ConnectedNode
 alias Neurlang.Accumulator, as: Accumulator
 alias Neurlang.Actuator, as: Actuator
 
-defrecord Neurlang.Actuator, id: nil, inbound_connections: [], outbound_connections: [], 
+defrecord Neurlang.Actuator, inbound_connections: [], outbound_connections: [], 
 										         barrier: HashDict.new do
  
   @moduledoc """
   Metadata for the Actuator node:
-
-  * `id` - a unique id gotten from calling make_ref()
 
 	* `inbound_connections` - a list of pid's of neurons nodes this actuator should expect to receive input from
 
@@ -21,7 +19,6 @@ defrecord Neurlang.Actuator, id: nil, inbound_connections: [], outbound_connecti
   """
 	use Neurlang
 
-	record_type id: reference
 	record_type inbound_connections: [pid]
 	record_type outbound_connections: [pid]
 	record_type barrier: Dict

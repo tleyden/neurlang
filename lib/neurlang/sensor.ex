@@ -3,12 +3,10 @@ alias Neurlang.ConnectedNode, as: ConnectedNode
 alias Neurlang.Accumulator, as: Accumulator
 alias Neurlang.Sensor, as: Sensor
 
-defrecord Neurlang.Sensor, id: nil, sync_function: nil, outbound_connections: []  do
+defrecord Neurlang.Sensor, sync_function: nil, outbound_connections: []  do
 
   @moduledoc """
   Metadata for the Neuron node:
-
-  * `id` - a unique id gotten from calling make_ref()
 
 	* `sync_function` - this function is called when the sensor receives a sync message.  
                       the return value is expected to be an input vector, and is forwarded
@@ -18,7 +16,6 @@ defrecord Neurlang.Sensor, id: nil, sync_function: nil, outbound_connections: []
   """
 	use Neurlang
 
-	record_type id: reference
 	record_type sync_function: (fun(any) -> [number])
 	record_type outbound_connections: [pid]
 
