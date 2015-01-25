@@ -1,7 +1,8 @@
 # Neurlang
 
 
-A library for constructing Neural Networks in [Elixir](http://elixir-lang.org/) or Erlang.  
+A library for constructing [Neural Networks](https://en.wikipedia.org/wiki/Artificial_neural_network)
+in [Elixir](http://elixir-lang.org/) or [Erlang](http://www.erlang.org/).  
 
 Neurlang is essentially a port of the [DXNN2](https://github.com/CorticalComputer/DXNN2) core neural network elements.  
 
@@ -10,7 +11,9 @@ However, unlike [DXNN2](https://github.com/CorticalComputer/DXNN2), Neurlang:
 * Is written in Elixir
 * Is easily usable in non-TWEANN's (Topology WEight Adapting Neural Networks).  
 
-The goal is that any neural network should be able to be built using the components available in Neurlang.  If you want to build a neural network, and Neurlang is missing something you need, please file an issue with a feature request.
+The goal is that any neural network should be able to be built using the components available in Neurlang.
+If you want to build a neural network, and Neurlang is missing something you need,
+please file an issue with a feature request.
 
 ___Status: Neurlang is still in the process of being built, and is therefore is about as stable as the price of bitcoins___
 
@@ -28,7 +31,7 @@ ___Status: Neurlang is still in the process of being built, and is therefore is 
     # tap into actuator for testing purposes
     NodeProcess.add_outbound_connection(actuator, self())
 
-    # feed intput into sensor
+    # feed input into sensor
     NodeProcess.sync(sensor)
 
     # verify actuator output
@@ -37,7 +40,8 @@ ___Status: Neurlang is still in the process of being built, and is therefore is 
 
 # Architecture
 
-Neurlang provides three types of neural elements, all of which are <code>gen_server</code> processes which can link up with eachother and exchange messages.
+Neurlang provides three types of neural elements, all of which are <code>gen_server</code> processes
+which can link up with each other and exchange messages.
 
 * Sensor 
 
@@ -47,7 +51,8 @@ Neurlang provides three types of neural elements, all of which are <code>gen_ser
 
 # Related Work
 
-[DXNN2](https://github.com/CorticalComputer/DXNN2) - Pure Erlang TWEANN (Topology WEight Adapting Neural Network).  Neurlang is essentially a port of the DXNN2 core neural network elements.  
+[DXNN2](https://github.com/CorticalComputer/DXNN2) - Pure Erlang TWEANN (Topology WEight Adapting Neural Network).
+Neurlang is essentially a port of the DXNN2 core neural network elements.  
 
 # Related Publications
 
